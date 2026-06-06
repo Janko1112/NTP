@@ -1,0 +1,27 @@
+//---------------------------------------------------------------------------
+
+#ifndef UnitUnosAutaH
+#define UnitUnosAutaH
+//---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include <memory>
+//---------------------------------------------------------------------------
+class TFormUnosAuta : public TForm
+{
+__published:	// IDE-managed Components
+	TEdit *EditMarka;
+	TEdit *EditModel;
+	TEdit *EditCijena;
+	TButton *BtnSpremi;
+	void __fastcall BtnSpremiClick(TObject *Sender);
+private:	// User declarations
+public:		// User declarations
+	__fastcall TFormUnosAuta(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TFormUnosAuta *FormUnosAuta;
+//---------------------------------------------------------------------------
+#endif

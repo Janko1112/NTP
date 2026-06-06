@@ -1,0 +1,234 @@
+object FormGlavna: TFormGlavna
+  Left = 0
+  Top = 0
+  Caption = '+'
+  ClientHeight = 524
+  ClientWidth = 787
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OnClose = FormClose
+  OnCreate = FormCreate
+  TextHeight = 15
+  object Button1: TButton
+    Left = 64
+    Top = 271
+    Width = 75
+    Height = 25
+    Caption = 'Testiraj klase'
+    TabOrder = 0
+    OnClick = Button1Click
+  end
+  object Memo1: TMemo
+    Left = 18
+    Top = 8
+    Width = 185
+    Height = 257
+    Lines.Strings = (
+      'Memo1')
+    TabOrder = 1
+  end
+  object BtnDodajAutomobil: TButton
+    Left = -8
+    Top = 311
+    Width = 105
+    Height = 25
+    Caption = 'Dodaj automobil'
+    TabOrder = 2
+    OnClick = BtnDodajAutomobilClick
+  end
+  object BtnSpremiPDF: TButton
+    Left = 40
+    Top = 420
+    Width = 129
+    Height = 25
+    Caption = 'Generiraj PDF Ra'#269'un'
+    TabOrder = 3
+    OnClick = BtnSpremiPDFClick
+  end
+  object BtnPrikaziAuti: TButton
+    Left = 24
+    Top = 451
+    Width = 161
+    Height = 25
+    Caption = 'U'#269'itaj automobile iz baze'
+    TabOrder = 4
+    OnClick = BtnPrikaziAutiClick
+  end
+  object BtnNoviKupac: TButton
+    Left = 103
+    Top = 311
+    Width = 121
+    Height = 25
+    Caption = 'Dodaj novog kupca'
+    TabOrder = 5
+    OnClick = BtnNoviKupacClick
+  end
+  object BtnKupiAuto: TButton
+    Left = 304
+    Top = 240
+    Width = 185
+    Height = 25
+    Caption = 'Zapi'#353'i kupnju (Spajanje tablica)'
+    TabOrder = 6
+    OnClick = BtnKupiAutoClick
+  end
+  object ComboKupci: TComboBox
+    Left = 264
+    Top = 112
+    Width = 145
+    Height = 23
+    TabOrder = 7
+    Text = 'ComboKupci'
+  end
+  object ComboAutomobili: TComboBox
+    Left = 415
+    Top = 112
+    Width = 145
+    Height = 23
+    TabOrder = 8
+    Text = 'ComboAutomobili'
+  end
+  object BtnObrisiKupca: TButton
+    Left = 288
+    Top = 192
+    Width = 75
+    Height = 25
+    Caption = 'Obri'#353'i Kupca'
+    TabOrder = 9
+    OnClick = BtnObrisiKupcaClick
+  end
+  object BtnUrediKupca: TButton
+    Left = 288
+    Top = 152
+    Width = 75
+    Height = 25
+    Caption = 'Uredi Kupca'
+    TabOrder = 10
+    OnClick = BtnUrediKupcaClick
+  end
+  object BtnObrisiAuto: TButton
+    Left = 440
+    Top = 192
+    Width = 75
+    Height = 25
+    Caption = 'Obri'#353'i Auto'
+    TabOrder = 11
+    OnClick = BtnObrisiAutoClick
+  end
+  object BtnUrediAuto: TButton
+    Left = 440
+    Top = 152
+    Width = 75
+    Height = 25
+    Caption = 'Uredi Auto'
+    TabOrder = 12
+    OnClick = BtnUrediAutoClick
+  end
+  object BtnNapredniIzvjestaj: TButton
+    Left = 582
+    Top = 211
+    Width = 155
+    Height = 25
+    Caption = 'Napredni financijski izvje'#353'ta'
+    TabOrder = 13
+    OnClick = BtnNapredniIzvjestajClick
+  end
+  object BtnUcitajSliku: TButton
+    Left = 304
+    Top = 271
+    Width = 185
+    Height = 25
+    Caption = 'Spremi sliku za selektirani auto'
+    TabOrder = 14
+    OnClick = BtnUcitajSlikuClick
+  end
+  object EditTraziKupca: TEdit
+    Left = 600
+    Top = 153
+    Width = 121
+    Height = 23
+    TabOrder = 15
+    Text = 'EditTraziKupca'
+  end
+  object ComboSortIzvjestaj: TComboBox
+    Left = 582
+    Top = 182
+    Width = 155
+    Height = 23
+    TabOrder = 16
+    Text = 'ComboSortIzvjestaj'
+    Items.Strings = (
+      'Cijena uzlazno'
+      'Cijena silazno')
+  end
+  object BtnPokreniDretve: TButton
+    Left = 304
+    Top = 389
+    Width = 185
+    Height = 25
+    Caption = 'Pokreni Thread Pool zadatke'
+    TabOrder = 17
+    OnClick = BtnPokreniDretveClick
+  end
+  object BtnSiguranUI: TButton
+    Left = 304
+    Top = 420
+    Width = 185
+    Height = 25
+    Caption = 'Testiraj Synchronize i Queue'
+    TabOrder = 18
+    OnClick = BtnSiguranUIClick
+  end
+  object BtnZakljucavanje: TButton
+    Left = 304
+    Top = 451
+    Width = 185
+    Height = 25
+    Caption = 'Demonstriraj Zaklju'#269'avanje'
+    TabOrder = 19
+    OnClick = BtnZakljucavanjeClick
+  end
+  object BtnIzveziSve: TButton
+    Left = 0
+    Top = 342
+    Width = 224
+    Height = 25
+    Caption = '1. Izvoz podataka (Zapis, Izmjena, Brisanje)'
+    TabOrder = 20
+    OnClick = BtnIzveziSveClick
+  end
+  object BtnUveziSve: TButton
+    Left = 0
+    Top = 373
+    Width = 224
+    Height = 25
+    Caption = '2. Uvoz podataka ('#268'itanje i Parsiranje)'
+    TabOrder = 21
+    OnClick = BtnUveziSveClick
+  end
+  object KonekcijaBaza: TFDConnection
+    Params.Strings = (
+      'Database=.\AutoSalon.db'
+      'DriverID=sQLite')
+    LoginPrompt = False
+    Left = 272
+    Top = 16
+  end
+  object FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink
+    Left = 392
+    Top = 16
+  end
+  object FDGUIxWaitCursor1: TFDGUIxWaitCursor
+    Provider = 'Forms'
+    Left = 528
+    Top = 16
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 656
+    Top = 16
+  end
+end

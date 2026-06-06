@@ -1,0 +1,55 @@
+#pragma hdrstop
+#include "UnitKlase.h"
+#pragma package(smart_init)
+
+// --- Implementacija za TAutomobil ---
+TAutomobil::TAutomobil(String marka, String model, double cijena) {
+    Marka = marka;
+    Model = model;
+    Cijena = cijena;
+}
+
+String TAutomobil::DohvatiPuniNaziv() {
+    return Marka + " " + Model;
+}
+
+double TAutomobil::DohvatiCijenu() {
+    return Cijena;
+}
+
+void TAutomobil::PrimijeniPopust(double postotak) {
+    if (postotak > 0 && postotak <= 100) {
+        Cijena = Cijena - (Cijena * (postotak / 100.0));
+    }
+}
+
+// --- Implementacija za TKupac ---
+TKupac::TKupac(String ime, String prezime, String oib) {
+    Ime = ime;
+    Prezime = prezime;
+    OIB = oib;
+}
+
+String TKupac::DohvatiPodatke() {
+    return Ime + " " + Prezime + " (OIB: " + OIB + ")";
+}
+
+String TKupac::GetOIB() {
+    return OIB;
+}
+
+// --- Implementacija za TKupnja ---
+TKupnja::TKupnja(TKupac* k, TAutomobil* a, String datum) {
+    Kupac = k;
+    Automobil = a;
+    Datum = datum;
+}
+
+String TKupnja::GenerirajUgovor() {
+    return "UGOVOR O KUPNJI\n" +
+           "Datum: " + Datum + "\n" +
+           "Kupac: " + Kupac->DohvatiPodatke() + "\n" +
+           "Vozilo: " + Automobil->DohvatiPuniNaziv() + "\n" +
+           "Ukupna cijena: " + FloatToStrF(Automobil->DohvatiCijenu(), ffCurrency, 10, 2);
+}
+

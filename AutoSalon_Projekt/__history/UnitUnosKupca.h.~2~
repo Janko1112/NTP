@@ -1,0 +1,21 @@
+//---------------------------------------------------------------------------
+
+#ifndef UnitUnosKupcaH
+#define UnitUnosKupcaH
+//---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+//---------------------------------------------------------------------------
+class TFormUnosKupca : public TForm
+{
+__published:	// IDE-managed Components
+private:	// User declarations
+public:		// User declarations
+	__fastcall TFormUnosKupca(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TFormUnosKupca *FormUnosKupca;
+//---------------------------------------------------------------------------
+#endif
