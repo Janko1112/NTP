@@ -1,0 +1,18 @@
+#include <vcl.h>
+#pragma hdrstop
+
+class __declspec(dllexport) TStatistikaSalona {
+public:
+    double IzracunajPorezi(double cijena) {
+		return cijena * 0.05;
+    }
+
+    double IzracunajTrosakUvoza(double cijena) {
+		return cijena * 0.02 + 350.0;
+    }
+};
+
+int WINAPI DllEntryPoint(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
+    return 1;
+}
+

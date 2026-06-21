@@ -1,0 +1,43 @@
+#include <vcl.h>
+#pragma hdrstop
+#include <tchar.h>
+
+// Ukljuèujemo toèna zaglavlja za sve tvoje forme:
+#include "UnitGlavna.h"
+#include "UnitUnosAuta.h"
+#include "UnitUnosKupca.h"
+#include "UnitPostavke.h"
+
+int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
+{
+	try
+	{
+		Application->Initialize();
+		Application->MainFormOnTaskBar = true;
+
+		// Inicijalizacija tvojih stvarnih formi (Form1 je izbaèen!):
+		Application->CreateForm(__classid(TFormGlavna), &FormGlavna);
+		Application->CreateForm(__classid(TFormUnosAuta), &FormUnosAuta);
+		Application->CreateForm(__classid(TFormUnosKupca), &FormUnosKupca);
+		Application->CreateForm(__classid(TFormPostavke), &FormPostavke);
+
+		Application->Run();
+	}
+	catch (Exception &exception)
+	{
+		Application->ShowException(&exception);
+	}
+	catch (...)
+	{
+		try
+		{
+			throw Exception("");
+		}
+		catch (Exception &exception)
+		{
+			Application->ShowException(&exception);
+		}
+	}
+	return 0;
+}
+

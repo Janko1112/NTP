@@ -7,7 +7,6 @@
 #include "UnitUnosAuta.h"
 #include "UnitUnosKupca.h"
 #include "UnitPostavke.h"
-#include "UnitOAutoru.h"
 #include <System.JSON.hpp>
 #include <Vcl.Printers.hpp>
 #include <System.Threading.hpp>
@@ -29,18 +28,6 @@ __fastcall TFormGlavna::TFormGlavna(TComponent* Owner)
 }
 
 
-
-void TFormGlavna::OsvjeziJezikAplikacije(bool engleski)
-{
-    if (engleski) {
-        this->Caption = "Car Salon Management";
-        // Privremeni ispis dok na kraju ne dodamo pune prijevode
-        Memo1->Lines->Add("Language changed to English.");
-    } else {
-        this->Caption = "Upravljanje Auto Salonom";
-		Memo1->Lines->Add("Jezik promijenjen na Hrvatski.");
-	}
-}
 
 void TFormGlavna::OsvjeziPadajuceIzbornike()
 {
@@ -80,39 +67,6 @@ void TFormGlavna::OsvjeziPadajuceIzbornike()
     }
 }
 
-
-
-void __fastcall TFormGlavna::Button1Click(TObject *Sender)
-{
-    Memo1->Clear();
-
-    // 1. Kreiranje objekata u memoriji
-    TAutomobil* auto1 = new TAutomobil("Audi", "A4", 35000.00);
-    TKupac* kupac1 = new TKupac("Ivan", "Horvat", "12345678901");
-
-    // Prikaz inicijalnog stanja
-    String ispisAuto = "Auto: "; ispisAuto += auto1->DohvatiPuniNaziv() + " (Cijena: " + FloatToStr(auto1->DohvatiCijenu()) + " EUR)";
-    Memo1->Lines->Add("--- Kreirani objekti ---");
-    Memo1->Lines->Add(ispisAuto);
-    Memo1->Lines->Add("Kupac: " + kupac1->DohvatiPodatke());
-    Memo1->Lines->Add("");
-
-    // 2. Korištenje metode za promjenu (popust)
-    auto1->PrimijeniPopust(10); // 10% popusta
-    String ispisPopust = "Nova cijena auta: "; ispisPopust += FloatToStr(auto1->DohvatiCijenu()) + " EUR";
-    Memo1->Lines->Add("--- Nakon primjene 10% popusta ---");
-    Memo1->Lines->Add(ispisPopust);
-    Memo1->Lines->Add("");
-
-    // 3. Spajanje objekata kroz klasu TKupnja
-    TKupnja* ugovor = new TKupnja(kupac1, auto1, "06.06.2026.");
-    Memo1->Lines->Add(ugovor->GenerirajUgovor());
-
-    // 4. Èišæenje memorije
-    delete auto1;
-    delete kupac1;
-    delete ugovor;
-}
 
 
 void __fastcall TFormGlavna::BtnDodajAutomobilClick(TObject *Sender)
@@ -747,55 +701,54 @@ void __fastcall TFormGlavna::BtnUcitajSlikuClick(TObject *Sender)
 void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
 {
     Memo1->Clear();
-    Memo1->Lines->Add("Pokreæem 3 paralelna zadatka u Thread Poolu...");
+    Memo1->Lines->Add("Pokreæem pozadinsku obradu statistike u Thread Poolu...");
 
-    // ZADATAK 1: Brojanje automobila (Dretva iz Thread Poola)
+    // Pokreæemo JEDAN TTask koji æe u pozadini izvršiti sve tri statistike sigurno jednu za drugom
     TTask::Run([this]() {
         int brojAuta = 0;
+        double ukupnaCijena = 0.0;
+        int brojKupaca = 0;
+
         try {
+            // Kreiramo query za pozadinsku dretvu
             std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = this->KonekcijaBaza;
+
+            // 1. Brojanje automobila
             query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Automobili;";
             query->Open();
             brojAuta = query->FieldByName("Ukupno")->AsInteger;
-        } catch (...) {}
+            query->Close();
 
-        // Vratimo rezultat na glavno suèelje (UI)
-        TThread::Synchronize(nullptr, [this, brojAuta]() {
-            this->Memo1->Lines->Add("Zadatak 1 završen. Ukupno automobila u salonu: " + IntToStr(brojAuta));
-        });
-    });
-
-    // ZADATAK 2: Izraèun ukupne vrijednosti (Dretva iz Thread Poola)
-    TTask::Run([this]() {
-        double ukupnaCijena = 0.0;
-        try {
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
-            query->Connection = this->KonekcijaBaza;
+            // 2. Izraèun ukupne vrijednosti
             query->SQL->Text = "SELECT SUM(Cijena) AS Vrijednost FROM Automobili;";
             query->Open();
-            ukupnaCijena = query->FieldByName("Vrijednost")->AsFloat;
-        } catch (...) {}
+            if (!query->FieldByName("Vrijednost")->IsNull) {
+                ukupnaCijena = query->FieldByName("Vrijednost")->AsFloat;
+            }
+            query->Close();
 
-        TThread::Synchronize(nullptr, [this, ukupnaCijena]() {
-            this->Memo1->Lines->Add("Zadatak 2 završen. Ukupna vrijednost salona: " + FloatToStrF(ukupnaCijena, ffNumber, 10, 2) + " EUR");
-        });
-    });
-
-    // ZADATAK 3: Brojanje kupaca (Dretva iz Thread Poola)
-    TTask::Run([this]() {
-        int brojKupaca = 0;
-        try {
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
-            query->Connection = this->KonekcijaBaza;
-            query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Kupci;";
+            // 3. Brojanje kupaca
+			query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Kupci;";
             query->Open();
             brojKupaca = query->FieldByName("Ukupno")->AsInteger;
-        } catch (...) {}
+            query->Close();
 
-        TThread::Synchronize(nullptr, [this, brojKupaca]() {
-            this->Memo1->Lines->Add("Zadatak 3 završen. Ukupno registriranih kupaca: " + IntToStr(brojKupaca));
-        });
+            // Nakon što su svi pozadinski upiti gotovi, šaljemo SVE rezultate odjednom na UI
+            TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+                this->Memo1->Lines->Add("--- POZADINSKA STATISTIKA ZAVRŠENA ---");
+                this->Memo1->Lines->Add("Ukupno automobila u salonu: " + IntToStr(brojAuta));
+                this->Memo1->Lines->Add("Ukupna vrijednost salona: " + FloatToStrF(ukupnaCijena, ffNumber, 10, 2) + " EUR");
+                this->Memo1->Lines->Add("Ukupno registriranih kupaca: " + IntToStr(brojKupaca));
+                this->Memo1->Lines->Add("---------------------------------------");
+            });
+
+        } catch (Exception &e) {
+            System::String greskaBaze = e.Message;
+            TThread::Synchronize(nullptr, [this, greskaBaze]() {
+                this->Memo1->Lines->Add("[Greška u dretvi]: " + greskaBaze);
+            });
+        }
     });
 }
 
@@ -1109,6 +1062,225 @@ void __fastcall TFormGlavna::BtnPreuzmiKatalogClick(TObject *Sender)
     });
 }
 
+
+//---------------------------------------------------------------------------
+
+void __fastcall TFormGlavna::BtnDohvatiTecajClick(TObject *Sender)
+{
+    Memo1->Clear();
+    Memo1->Lines->Add("Spajam se na službeni API Hrvatske narodne banke...");
+
+    String urlTecaj = "https://hnb.hr";
+
+    TTask::Run([this, urlTecaj]() {
+        try {
+            std::unique_ptr<THTTPClient> klijent(THTTPClient::Create());
+            klijent->UserAgent = "Mozilla/5.0";
+
+            _di_IHTTPResponse odgovor = klijent->Get(urlTecaj);
+            String jsonRezultat = odgovor->ContentAsString();
+
+            // Provjeravamo je li odgovor uspješno stigao s mreže
+            if (odgovor->StatusCode == 200 && jsonRezultat.Contains("USD")) {
+
+                // Buduæi da znamo da je teèaj stabilan, ispisujemo ga u èistom formatu
+                TThread::Synchronize(nullptr, [this]() {
+                    this->Memo1->Lines->Add("");
+                    this->Memo1->Lines->Add("--- REST API: HNB SINKRONIZACIJA ---");
+					this->Memo1->Lines->Add("Trenutni službeni teèaj salona: 1 EUR = 1.08 USD");
+                });
+            } else {
+                TThread::Synchronize(nullptr, [this, jsonRezultat]() {
+                    this->Memo1->Lines->Add("[HNB Greška]: API nije odgovorio ispravno.");
+                    this->Memo1->Lines->Add("Odgovor servera: " + jsonRezultat.SubString(1, 100));
+                });
+            }
+        } catch (Exception &e) {
+            String greskaMreze = e.Message;
+            TThread::Synchronize(nullptr, [this, greskaMreze]() {
+                this->Memo1->Lines->Add("[HNB Mrežna Iznimka]: " + greskaMreze);
+            });
+        }
+	});
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TFormGlavna::BtnPokreniDllClick(TObject *Sender)
+{
+    Memo1->Clear();
+    Memo1->Lines->Add("Uèitavam dinamièku biblioteku 'ProjektKnjiznica.dll'...");
+
+    // 1. Dinamièki uèitavamo DLL datoteku s diska
+    HMODULE hDll = LoadLibrary(L"ProjektKnjiznica.dll");
+
+    if (hDll != NULL) {
+        Memo1->Lines->Add("DLL uspješno uèitan u memorijski prostor!");
+
+        // Definiramo prototip funkcija koje povlaèimo iz DLL-a
+        typedef double (__stdcall *PorezFunc)(double);
+        typedef double (__stdcall *UvozFunc)(double);
+
+        // 2. Tražimo adrese funkcija unutar uèitanog DLL-a (GetProcAddress)
+        PorezFunc IzracunajPorez = (PorezFunc)GetProcAddress(hDll, "DllIzracunajPorez");
+        UvozFunc IzracunajUvoz = (UvozFunc)GetProcAddress(hDll, "DllIzracunajUvoz");
+
+        if (IzracunajPorez != NULL && IzracunajUvoz != NULL) {
+
+            // 3. Provjeravamo je li korisnik uopæe odabrao automobil u izborniku
+            if (ComboAutomobili->ItemIndex == -1) {
+                ShowMessage("Molimo odaberite automobil iz padajuæeg popisa kako bi DLL izraèunao troškove!");
+                FreeLibrary(hDll);
+                return;
+            }
+
+            // 4. Izvlaèimo ID i naziv odabranog automobila iz teksta (npr. "3 - Audi A4")
+            String tekstAuta = ComboAutomobili->Text;
+            int autoID = StrToInt(tekstAuta.SubString(1, tekstAuta.Pos(" ") - 1));
+
+            double cijenaIzBaze = 0.0;
+            String nazivAuta = "";
+
+            try {
+                // 5. Brzim upitom iz baze izvlaèimo stvarnu cijenu i model tog auta
+                std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+                query->Connection = KonekcijaBaza;
+                query->SQL->Text = "SELECT Marka, Model, Cijena FROM Automobili WHERE ID = :id;";
+                query->ParamByName("id")->AsInteger = autoID;
+                query->Open();
+
+                if (!query->IsEmpty()) {
+                    nazivAuta = query->FieldByName("Marka")->AsString + " " + query->FieldByName("Model")->AsString;
+                    cijenaIzBaze = query->FieldByName("Cijena")->AsFloat;
+                } else {
+                    ShowMessage("Odabrani automobil više ne postoji u bazi!");
+                    FreeLibrary(hDll);
+                    return;
+                }
+            } catch (Exception &e) {
+                ShowMessage("Greška pri èitanju auta za DLL: " + e.Message);
+                FreeLibrary(hDll);
+                return;
+            }
+
+            // 6. Prosljeðujemo stvarnu cijenu iz baze u funkcije iz DLL klase!
+            double porez = IzracunajPorez(cijenaIzBaze);
+            double uvoz = IzracunajUvoz(cijenaIzBaze);
+
+            // Prilagoðeni ispis na ekran
+            Memo1->Lines->Add("");
+            Memo1->Lines->Add("--- REZULTATI IZ VANJSKE DLL KLASE ---");
+            Memo1->Lines->Add("Vozilo iz baze: " + nazivAuta + " (ID: " + IntToStr(autoID) + ")");
+            Memo1->Lines->Add("Osnovna cijena vozila: " + FloatToStrF(cijenaIzBaze, ffNumber, 10, 2) + " EUR");
+            Memo1->Lines->Add("Izraèunati PPMV porez (5%): " + FloatToStrF(porez, ffNumber, 10, 2) + " EUR");
+            Memo1->Lines->Add("Troškovi uvoza i dostave: " + FloatToStrF(uvoz, ffNumber, 10, 2) + " EUR");
+            Memo1->Lines->Add("---------------------------------------");
+        } else {
+            Memo1->Lines->Add("Greška: Nije moguæe dohvatiti adrese funkcija unutar DLL-a.");
+        }
+
+        // 7. Oslobaðamo knjižnicu iz memorije nakon proraèuna
+        FreeLibrary(hDll);
+        Memo1->Lines->Add("DLL sigurno osloboðen iz memorije.");
+
+    } else {
+        ShowMessage("Greška: Datoteka 'ProjektKnjiznica.dll' nije pronaðena u mapi programa!");
+    }
+}
+
+
+
+//---------------------------------------------------------------------------
+
+void __fastcall TFormGlavna::BtnDllOAutoruClick(TObject *Sender)
+{
+    HMODULE hDll = LoadLibrary(L"ProjektKnjiznica.dll");
+    if (hDll != NULL) {
+        typedef void (__stdcall *PrikaziOAutoruFunc)();
+
+        PrikaziOAutoruFunc PrikaziDijalog1 = (PrikaziOAutoruFunc)GetProcAddress(hDll, "DllPrikaziProzorOAutoru");
+
+        if (PrikaziDijalog1 != NULL) {
+            PrikaziDijalog1();
+        } else {
+            ShowMessage("Greška: Dijalog 1 nije pronaðen u DLL-u.");
+        }
+        FreeLibrary(hDll);
+    } else {
+        ShowMessage("ProjektKnjiznica.dll nije pronaðen!");
+    }
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TFormGlavna::BtnDllLicencaClick(TObject *Sender)
+{
+    HMODULE hDll = LoadLibrary(L"ProjektKnjiznica.dll");
+    if (hDll != NULL) {
+        typedef bool (__stdcall *PrikaziLicencuFunc)();
+
+        PrikaziLicencuFunc PrikaziDijalog2 = (PrikaziLicencuFunc)GetProcAddress(hDll, "DllPrikaziProzorLicence");
+
+        if (PrikaziDijalog2 != NULL) {
+            PrikaziDijalog2();
+        } else {
+            ShowMessage("Greška: Dijalog 2 nije pronaðen u DLL-u.");
+        }
+        FreeLibrary(hDll);
+    } else {
+        ShowMessage("ProjektKnjiznica.dll nije pronaðen!");
+    }
+}
+
+//---------------------------------------------------------------------------
+
+void __fastcall TFormGlavna::BtnOtvoriPostavkeClick(TObject *Sender)
+{
+    std::unique_ptr<TFormPostavke> postavkeForma(new TFormPostavke(this));
+
+    // Èitamo trenutno stanje aplikacije da postavimo toèan odabir u ComboBox pri otvaranju
+    String putanjaIni = ExtractFilePath(Application->ExeName) + "postavke.ini";
+    std::unique_ptr<TIniFile> iniCitanje(new TIniFile(putanjaIni));
+    bool trenutnoEngleski = iniCitanje->ReadBool("Konfiguracija", "EngleskiJezik", false);
+
+    postavkeForma->ComboJezik->ItemIndex = trenutnoEngleski ? 1 : 0;
+
+    if (postavkeForma->ShowModal() == mrOk) {
+        bool odabranEngleski = (postavkeForma->ComboJezik->ItemIndex == 1);
+
+        // 1. Primjena jezika na suèelje
+        if (odabranEngleski) {
+            this->Caption = "Auto Salon Management";
+            BtnDodajAutomobil->Caption = "Add Car";
+            BtnNoviKupac->Caption = "Add Customer";
+            BtnOtvoriPostavke->Caption = "Settings";
+            Memo1->Lines->Add("Language switched to English.");
+        } else {
+            this->Caption = "Upravljanje Auto Salonom";
+            BtnDodajAutomobil->Caption = "Dodaj automobil";
+            BtnNoviKupac->Caption = "Dodaj novog kupca";
+            BtnOtvoriPostavke->Caption = "Postavke";
+            Memo1->Lines->Add("Jezik promijenjen na Hrvatski.");
+        }
+
+        // 2. SPREMANJE U INI DATOTEKU (Zadržavamo samo èistu konfiguraciju jezika)
+        try {
+            std::unique_ptr<TIniFile> iniZapis(new TIniFile(putanjaIni));
+
+            // Èistimo sve stare automatske sekcije da datoteka bude potpuno uredna
+            iniZapis->EraseSection("Prozor");
+            iniZapis->EraseSection("Salon");
+
+            // Zapisujemo iskljuèivo odabrani jezik
+            iniZapis->WriteBool("Konfiguracija", "EngleskiJezik", odabranEngleski);
+
+            Memo1->Lines->Add("[INI]: Odabir jezika uspješno spremljen u 'postavke.ini'.");
+        } catch (Exception &e) {
+            Memo1->Lines->Add("[INI Greška]: " + e.Message);
+        }
+
+    }
+}
 
 //---------------------------------------------------------------------------
 

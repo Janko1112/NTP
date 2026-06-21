@@ -1,0 +1,47 @@
+#include <vcl.h>
+#pragma hdrstop
+#include <Vcl.Dialogs.hpp>
+
+class TStatistikaSalona {
+public:
+    double IzracunajPorezi(double cijena) { return cijena * 0.05; }
+    double IzracunajTrosakUvoza(double cijena) { return cijena * 0.02 + 350.0; }
+};
+
+extern "C" __declspec(dllexport) double __stdcall DllIzracunajPorez(double cijena) {
+    TStatistikaSalona stats; return stats.IzracunajPorezi(cijena);
+}
+
+extern "C" __declspec(dllexport) double __stdcall DllIzracunajUvoz(double cijena) {
+    TStatistikaSalona stats; return stats.IzracunajTrosakUvoza(cijena);
+}
+
+
+
+extern "C" __declspec(dllexport) void __stdcall DllPrikaziProzorOAutoru() {
+    String info = "=== AUTOR APLIKACIJE ===\n\n"
+                  "Ime i Prezime: [Tvoje Ime i Prezime]\n"
+                  "Broj indeksa: [Tvoj Broj Indeksa]\n"
+                  "Fakultet: FOI Varaždin\n\n"
+                  "Sustav: Upravljanje Auto Salonom v2026\n"
+                  "Ovaj prozor je uèitan kao vizualni DIJALOG 1 iz DLL-a!";
+
+    MessageDlg(info, mtInformation, TMsgDlgButtons() << mbOK, 0);
+}
+
+extern "C" __declspec(dllexport) bool __stdcall DllPrikaziProzorLicence() {
+    String pitanje = "Pristupate administratorskim postavkama salona.\n"
+                     "Želite li verificirati sigurnosni certifikat iz baze podataka?\n\n"
+                     "Ovaj prozor je uèitan kao vizualni DIJALOG 2 iz DLL-a!";
+
+    if (MessageDlg(pitanje, mtConfirmation, TMsgDlgButtons() << mbYes << mbNo, 0) == mrYes) {
+        MessageDlg("Certifikat uspješno verificiran iz DLL knjižnice!", mtInformation, TMsgDlgButtons() << mbOK, 0);
+        return true;
+    }
+    return false;
+}
+
+int WINAPI DllEntryPoint(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
+    return 1;
+}
+

@@ -17,7 +17,7 @@ object FormUnosAuta: TFormUnosAuta
     Width = 121
     Height = 23
     TabOrder = 0
-    Text = 'EditMarka'
+    Text = 'Upi'#353'i marku'
   end
   object EditModel: TEdit
     Left = 208
@@ -25,7 +25,7 @@ object FormUnosAuta: TFormUnosAuta
     Width = 121
     Height = 23
     TabOrder = 1
-    Text = 'EditModel'
+    Text = 'Upi'#353'i model'
   end
   object EditCijena: TEdit
     Left = 64
@@ -33,7 +33,7 @@ object FormUnosAuta: TFormUnosAuta
     Width = 121
     Height = 23
     TabOrder = 2
-    Text = 'EditCijena'
+    Text = 'Upi'#353'i cijenu'
   end
   object BtnSpremi: TButton
     Left = 208

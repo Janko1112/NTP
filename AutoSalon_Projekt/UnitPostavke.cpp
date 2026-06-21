@@ -7,10 +7,17 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TForm1 *Form1;
+TFormPostavke *FormPostavke;
 //---------------------------------------------------------------------------
-__fastcall TForm1::TForm1(TComponent* Owner)
+__fastcall TFormPostavke::TFormPostavke(TComponent* Owner)
 	: TForm(Owner)
 {
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormPostavke::BtnSpremiPostavkeClick(TObject *Sender)
+{
+    this->ModalResult = mrOk;
+}
+
+//---------------------------------------------------------------------------
+

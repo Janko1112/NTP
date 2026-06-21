@@ -13,9 +13,15 @@
     
   </Kupac>
   <Kupac>
-    <Ime>Mato</Ime>
-    <Prezime>Sebešić</Prezime>
-    <OIB>432847328</OIB>
+    <Ime>Emanuel</Ime>
+    <Prezime>Zečević</Prezime>
+    <OIB>287458327</OIB>
+    
+  </Kupac>
+  <Kupac>
+    <Ime>Vito</Ime>
+    <Prezime>Jakopec</Prezime>
+    <OIB>134364564</OIB>
     
   </Kupac>
 </KatalogKupaca>

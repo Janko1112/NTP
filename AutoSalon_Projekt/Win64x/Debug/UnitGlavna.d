@@ -1065,5 +1065,15 @@
   c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\FireDAC.Stan.Pool.hpp \
   c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\FireDAC.VCLUI.Wait.hpp \
   c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\FireDAC.DApt.hpp \
-  UnitUnosAuta.h UnitUnosKupca.h UnitPostavke.h UnitOAutoru.h \
-  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\System.JSON.hpp
+  UnitUnosAuta.h UnitUnosKupca.h UnitPostavke.h \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\System.JSON.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\System.Threading.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\SystemThreading.h \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\Xml.XMLDoc.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\Xml.xmldom.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\Xml.XMLConst.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\Xml.XMLIntf.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\System.Net.HttpClient.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\System.Net.URLClient.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\System.Net.Mime.hpp \
+  c:\program\ files\ (x86)\embarcadero\studio\37.0\include\windows\rtl\System.Net.HttpClientComponent.hpp

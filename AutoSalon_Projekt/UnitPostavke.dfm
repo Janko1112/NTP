@@ -1,4 +1,4 @@
-object Form1: TForm1
+object FormPostavke: TFormPostavke
   Left = 0
   Top = 0
   Caption = 'FormPostavke'
@@ -11,4 +11,24 @@ object Form1: TForm1
   Font.Name = 'Segoe UI'
   Font.Style = []
   TextHeight = 15
+  object ComboJezik: TComboBox
+    Left = 200
+    Top = 136
+    Width = 145
+    Height = 23
+    TabOrder = 0
+    Text = 'ComboJezik'
+    Items.Strings = (
+      'Hrvatski'
+      'English')
+  end
+  object BtnSpremiPostavke: TButton
+    Left = 200
+    Top = 176
+    Width = 75
+    Height = 25
+    Caption = 'Spremi'
+    TabOrder = 1
+    OnClick = BtnSpremiPostavkeClick
+  end
 end

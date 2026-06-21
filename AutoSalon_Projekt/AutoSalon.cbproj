@@ -196,14 +196,8 @@
             <DependentOn>UnitKlase.h</DependentOn>
             <BuildOrder>3</BuildOrder>
         </CppCompile>
-        <CppCompile Include="UnitOAutoru.cpp">
-            <Form>Form2</Form>
-            <FormType>dfm</FormType>
-            <DependentOn>UnitOAutoru.h</DependentOn>
-            <BuildOrder>7</BuildOrder>
-        </CppCompile>
         <CppCompile Include="UnitPostavke.cpp">
-            <Form>Form1</Form>
+            <Form>FormPostavke</Form>
             <FormType>dfm</FormType>
             <DependentOn>UnitPostavke.h</DependentOn>
             <BuildOrder>6</BuildOrder>
@@ -220,11 +214,6 @@
             <DependentOn>UnitUnosKupca.h</DependentOn>
             <BuildOrder>5</BuildOrder>
         </CppCompile>
-        <FormResources Include="UnitGlavna.dfm"/>
-        <FormResources Include="UnitUnosAuta.dfm"/>
-        <FormResources Include="UnitUnosKupca.dfm"/>
-        <FormResources Include="UnitPostavke.dfm"/>
-        <FormResources Include="UnitOAutoru.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -1,0 +1,54 @@
+#include <windows.h>
+
+class TStatistikaSalona {
+public:
+    double IzracunajPorezi(double cijena) { return cijena * 0.05; }
+    double IzracunajTrosakUvoza(double cijena) { return cijena * 0.02 + 350.0; }
+};
+
+extern "C" __declspec(dllexport) double __stdcall DllIzracunajPorez(double cijena) {
+    TStatistikaSalona stats;
+    return stats.IzracunajPorezi(cijena);
+}
+
+extern "C" __declspec(dllexport) double __stdcall DllIzracunajUvoz(double cijena) {
+    TStatistikaSalona stats;
+    return stats.IzracunajTrosakUvoza(cijena);
+}
+
+
+extern "C" __declspec(dllexport) void __stdcall DllPrikaziProzorOAutoru() {
+    MessageBoxW(
+        NULL,
+        L"=== AUTOR APLIKACIJE ===\n\n"
+        L"Ime i Prezime: [Tvoje Ime i Prezime]\n"
+        L"Broj indeksa: [Tvoj Broj Indeksa]\n"
+        L"Fakultet: FOI Varaždin\n\n"
+        L"Sustav: Upravljanje Auto Salonom v2026\n"
+        L"Ovaj prozor je uèitan kao vizualni DIJALOG 1 iz DLL-a!",
+        L"Informacije o Autoru (DLL)",
+        MB_OK | MB_ICONINFORMATION
+    );
+}
+
+extern "C" __declspec(dllexport) bool __stdcall DllPrikaziProzorLicence() {
+    int rezultat = MessageBoxW(
+        NULL,
+        L"Pristupate administratorskim postavkama salona.\n"
+        L"Želite li verificirati sigurnosni certifikat iz baze podataka?\n\n"
+        L"Ovaj prozor je uèitan kao vizualni DIJALOG 2 iz DLL-a!",
+        L"Verifikacija Licence (DLL)",
+        MB_YESNO | MB_ICONQUESTION
+    );
+
+    if (rezultat == IDYES) {
+        MessageBoxW(NULL, L"Certifikat uspješno verificiran iz DLL knjižnice!", L"Uspjeh", MB_OK | MB_ICONINFORMATION);
+        return true;
+    }
+    return false;
+}
+
+int WINAPI DllEntryPoint(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
+    return 1;
+}
+

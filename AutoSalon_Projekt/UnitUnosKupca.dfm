@@ -17,7 +17,7 @@ object FormUnosKupca: TFormUnosKupca
     Width = 121
     Height = 23
     TabOrder = 0
-    Text = 'EditIme'
+    Text = 'Ime'
   end
   object EditPrezime: TEdit
     Left = 56
@@ -25,7 +25,7 @@ object FormUnosKupca: TFormUnosKupca
     Width = 121
     Height = 23
     TabOrder = 1
-    Text = 'EditPrezime'
+    Text = 'Prezime'
   end
   object EditOIB: TEdit
     Left = 56
@@ -33,7 +33,7 @@ object FormUnosKupca: TFormUnosKupca
     Width = 121
     Height = 23
     TabOrder = 2
-    Text = 'EditOIB'
+    Text = 'OIB'
   end
   object BtnSpremiKupca: TButton
     Left = 200

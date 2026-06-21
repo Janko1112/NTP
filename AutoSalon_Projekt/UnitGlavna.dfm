@@ -1,7 +1,7 @@
 object FormGlavna: TFormGlavna
   Left = 0
   Top = 0
-  Caption = '+'
+  Caption = 'FormaGlavna'
   ClientHeight = 524
   ClientWidth = 787
   Color = clBtnFace
@@ -13,15 +13,6 @@ object FormGlavna: TFormGlavna
   OnClose = FormClose
   OnCreate = FormCreate
   TextHeight = 15
-  object Button1: TButton
-    Left = 64
-    Top = 271
-    Width = 75
-    Height = 25
-    Caption = 'Testiraj klase'
-    TabOrder = 0
-    OnClick = Button1Click
-  end
   object Memo1: TMemo
     Left = 18
     Top = 8
@@ -29,7 +20,7 @@ object FormGlavna: TFormGlavna
     Height = 257
     Lines.Strings = (
       'Memo1')
-    TabOrder = 1
+    TabOrder = 0
   end
   object BtnDodajAutomobil: TButton
     Left = -8
@@ -37,7 +28,7 @@ object FormGlavna: TFormGlavna
     Width = 105
     Height = 25
     Caption = 'Dodaj automobil'
-    TabOrder = 2
+    TabOrder = 1
     OnClick = BtnDodajAutomobilClick
   end
   object BtnSpremiPDF: TButton
@@ -46,7 +37,7 @@ object FormGlavna: TFormGlavna
     Width = 129
     Height = 25
     Caption = 'Generiraj PDF Ra'#269'un'
-    TabOrder = 3
+    TabOrder = 2
     OnClick = BtnSpremiPDFClick
   end
   object BtnPrikaziAuti: TButton
@@ -55,7 +46,7 @@ object FormGlavna: TFormGlavna
     Width = 161
     Height = 25
     Caption = 'U'#269'itaj automobile iz baze'
-    TabOrder = 4
+    TabOrder = 3
     OnClick = BtnPrikaziAutiClick
   end
   object BtnNoviKupac: TButton
@@ -64,7 +55,7 @@ object FormGlavna: TFormGlavna
     Width = 121
     Height = 25
     Caption = 'Dodaj novog kupca'
-    TabOrder = 5
+    TabOrder = 4
     OnClick = BtnNoviKupacClick
   end
   object BtnKupiAuto: TButton
@@ -73,7 +64,7 @@ object FormGlavna: TFormGlavna
     Width = 185
     Height = 25
     Caption = 'Zapi'#353'i kupnju (Spajanje tablica)'
-    TabOrder = 6
+    TabOrder = 5
     OnClick = BtnKupiAutoClick
   end
   object ComboKupci: TComboBox
@@ -81,16 +72,16 @@ object FormGlavna: TFormGlavna
     Top = 112
     Width = 145
     Height = 23
-    TabOrder = 7
-    Text = 'ComboKupci'
+    TabOrder = 6
+    Text = 'Odaberi kupca'
   end
   object ComboAutomobili: TComboBox
     Left = 415
     Top = 112
     Width = 145
     Height = 23
-    TabOrder = 8
-    Text = 'ComboAutomobili'
+    TabOrder = 7
+    Text = 'Odaberi auto'
   end
   object BtnObrisiKupca: TButton
     Left = 288
@@ -98,7 +89,7 @@ object FormGlavna: TFormGlavna
     Width = 75
     Height = 25
     Caption = 'Obri'#353'i Kupca'
-    TabOrder = 9
+    TabOrder = 8
     OnClick = BtnObrisiKupcaClick
   end
   object BtnUrediKupca: TButton
@@ -107,7 +98,7 @@ object FormGlavna: TFormGlavna
     Width = 75
     Height = 25
     Caption = 'Uredi Kupca'
-    TabOrder = 10
+    TabOrder = 9
     OnClick = BtnUrediKupcaClick
   end
   object BtnObrisiAuto: TButton
@@ -116,7 +107,7 @@ object FormGlavna: TFormGlavna
     Width = 75
     Height = 25
     Caption = 'Obri'#353'i Auto'
-    TabOrder = 11
+    TabOrder = 10
     OnClick = BtnObrisiAutoClick
   end
   object BtnUrediAuto: TButton
@@ -125,7 +116,7 @@ object FormGlavna: TFormGlavna
     Width = 75
     Height = 25
     Caption = 'Uredi Auto'
-    TabOrder = 12
+    TabOrder = 11
     OnClick = BtnUrediAutoClick
   end
   object BtnNapredniIzvjestaj: TButton
@@ -134,7 +125,7 @@ object FormGlavna: TFormGlavna
     Width = 155
     Height = 25
     Caption = 'Napredni financijski izvje'#353'ta'
-    TabOrder = 13
+    TabOrder = 12
     OnClick = BtnNapredniIzvjestajClick
   end
   object BtnUcitajSliku: TButton
@@ -143,7 +134,7 @@ object FormGlavna: TFormGlavna
     Width = 185
     Height = 25
     Caption = 'Spremi sliku za selektirani auto'
-    TabOrder = 14
+    TabOrder = 13
     OnClick = BtnUcitajSlikuClick
   end
   object EditTraziKupca: TEdit
@@ -151,16 +142,16 @@ object FormGlavna: TFormGlavna
     Top = 153
     Width = 121
     Height = 23
-    TabOrder = 15
-    Text = 'EditTraziKupca'
+    TabOrder = 14
+    Text = 'Tra'#382'i kupca'
   end
   object ComboSortIzvjestaj: TComboBox
     Left = 582
     Top = 182
     Width = 155
     Height = 23
-    TabOrder = 16
-    Text = 'ComboSortIzvjestaj'
+    TabOrder = 15
+    Text = 'Sortiraj izvje'#353'taje'
     Items.Strings = (
       'Cijena uzlazno'
       'Cijena silazno')
@@ -171,7 +162,7 @@ object FormGlavna: TFormGlavna
     Width = 185
     Height = 25
     Caption = 'Pokreni Thread Pool zadatke'
-    TabOrder = 17
+    TabOrder = 16
     OnClick = BtnPokreniDretveClick
   end
   object BtnSiguranUI: TButton
@@ -180,7 +171,7 @@ object FormGlavna: TFormGlavna
     Width = 185
     Height = 25
     Caption = 'Testiraj Synchronize i Queue'
-    TabOrder = 18
+    TabOrder = 17
     OnClick = BtnSiguranUIClick
   end
   object BtnZakljucavanje: TButton
@@ -189,7 +180,7 @@ object FormGlavna: TFormGlavna
     Width = 185
     Height = 25
     Caption = 'Demonstriraj Zaklju'#269'avanje'
-    TabOrder = 19
+    TabOrder = 18
     OnClick = BtnZakljucavanjeClick
   end
   object BtnIzveziSve: TButton
@@ -198,7 +189,7 @@ object FormGlavna: TFormGlavna
     Width = 224
     Height = 25
     Caption = '1. Izvoz podataka (Zapis, Izmjena, Brisanje)'
-    TabOrder = 20
+    TabOrder = 19
     OnClick = BtnIzveziSveClick
   end
   object BtnUveziSve: TButton
@@ -207,7 +198,7 @@ object FormGlavna: TFormGlavna
     Width = 224
     Height = 25
     Caption = '2. Uvoz podataka ('#268'itanje i Parsiranje)'
-    TabOrder = 21
+    TabOrder = 20
     OnClick = BtnUveziSveClick
   end
   object ProgressBarPreuzimanje: TProgressBar
@@ -215,7 +206,7 @@ object FormGlavna: TFormGlavna
     Top = 271
     Width = 155
     Height = 17
-    TabOrder = 22
+    TabOrder = 21
   end
   object ComboBrzina: TComboBox
     Left = 582
@@ -223,7 +214,7 @@ object FormGlavna: TFormGlavna
     Width = 150
     Height = 23
     ItemIndex = 2
-    TabOrder = 23
+    TabOrder = 22
     Text = 'Neograni'#269'eno'
     Items.Strings = (
       'Sporo (50 KB/s)'
@@ -236,8 +227,53 @@ object FormGlavna: TFormGlavna
     Width = 150
     Height = 25
     Caption = 'Preuzmi PDF Katalog'
-    TabOrder = 24
+    TabOrder = 23
     OnClick = BtnPreuzmiKatalogClick
+  end
+  object BtnDohvatiTecaj: TButton
+    Left = 584
+    Top = 389
+    Width = 153
+    Height = 25
+    Caption = 'A'#382'uriraj te'#269'aj EUR/USD u'#382'ivo'
+    TabOrder = 24
+    OnClick = BtnDohvatiTecajClick
+  end
+  object BtnPokreniDll: TButton
+    Left = 584
+    Top = 420
+    Width = 179
+    Height = 25
+    Caption = 'Izra'#269'un tro'#353'kova preko DLL klase'
+    TabOrder = 25
+    OnClick = BtnPokreniDllClick
+  end
+  object BtnDllOAutoru: TButton
+    Left = 584
+    Top = 451
+    Width = 179
+    Height = 25
+    Caption = 'Pokreni DLL Dijalog 1 (O Autoru)'
+    TabOrder = 26
+    OnClick = BtnDllOAutoruClick
+  end
+  object BtnDllLicenca: TButton
+    Left = 582
+    Top = 482
+    Width = 181
+    Height = 25
+    Caption = 'Pokreni DLL Dijalog 2 (Licenca)'
+    TabOrder = 27
+    OnClick = BtnDllLicencaClick
+  end
+  object BtnOtvoriPostavke: TButton
+    Left = 352
+    Top = 323
+    Width = 75
+    Height = 25
+    Caption = 'Postavke'
+    TabOrder = 28
+    OnClick = BtnOtvoriPostavkeClick
   end
   object KonekcijaBaza: TFDConnection
     Params.Strings = (

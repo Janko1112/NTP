@@ -1,22 +1,24 @@
-//---------------------------------------------------------------------------
-
 #ifndef UnitPostavkeH
 #define UnitPostavkeH
-//---------------------------------------------------------------------------
+
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
 #include <memory>
-//---------------------------------------------------------------------------
-class TForm1 : public TForm
+
+class TFormPostavke : public TForm
 {
-__published:	// IDE-managed Components
-private:	// User declarations
-public:		// User declarations
-	__fastcall TForm1(TComponent* Owner);
+__published:
+	TComboBox *ComboJezik;
+	TButton *BtnSpremiPostavke;
+	void __fastcall BtnSpremiPostavkeClick(TObject *Sender);
+
+public:
+	__fastcall TFormPostavke(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TForm1 *Form1;
-//---------------------------------------------------------------------------
+
+extern PACKAGE TFormPostavke *FormPostavke;
+
 #endif
+
