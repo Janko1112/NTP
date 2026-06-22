@@ -16,8 +16,6 @@ __fastcall TFormUnosAuta::TFormUnosAuta(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormUnosAuta::BtnSpremiClick(TObject *Sender)
 {
-    // Postavljamo ModalResult na mrOk, što automatski zatvara ovu formu
-    // i signalizira glavnoj formi da je korisnik kliknuo "Spremi"
     this->ModalResult = mrOk;
 }
 

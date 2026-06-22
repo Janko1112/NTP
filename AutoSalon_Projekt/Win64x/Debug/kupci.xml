@@ -1,14 +1,8 @@
 <?xml version="1.0"?>
 <KatalogKupaca>
   <Kupac>
-    <Ime>Karlo</Ime>
-    <Prezime>PREZIME_IZMIJENJENO_U_XMLU</Prezime>
-    <OIB>37628947932</OIB>
-    
-  </Kupac>
-  <Kupac>
     <Ime>Janko</Ime>
-    <Prezime>Jakopec</Prezime>
+    <Prezime>PREZIME_IZMIJENJENO_U_XMLU</Prezime>
     <OIB>482394823</OIB>
     
   </Kupac>
@@ -22,6 +16,12 @@
     <Ime>Vito</Ime>
     <Prezime>Jakopec</Prezime>
     <OIB>134364564</OIB>
+    
+  </Kupac>
+  <Kupac>
+    <Ime>Karlo</Ime>
+    <Prezime>Strnika</Prezime>
+    <OIB>12345654</OIB>
     
   </Kupac>
 </KatalogKupaca>

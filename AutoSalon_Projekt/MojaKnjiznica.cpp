@@ -24,8 +24,7 @@ extern "C" __declspec(dllexport) void __stdcall DllPrikaziProzorOAutoru() {
         L"Ime i Prezime: Janko Jakopec\n"
         L"JMBG: 0246115834\n"
         L"Fakultet: TVZ\n\n"
-        L"Sustav: Upravljanje Auto Salonom v2026\n"
-        L"Ovaj prozor je uèitan kao vizualni DIJALOG 1 iz DLL-a!",
+		L"Sustav: Upravljanje Auto Salonom v2026\n"
         L"Informacije o Autoru (DLL)",
         MB_OK | MB_ICONINFORMATION
     );
@@ -35,9 +34,8 @@ extern "C" __declspec(dllexport) bool __stdcall DllPrikaziProzorLicence() {
     int rezultat = MessageBoxW(
         NULL,
         L"Pristupate administratorskim postavkama salona.\n"
-        L"Želite li verificirati sigurnosni certifikat iz baze podataka?\n\n"
-        L"Ovaj prozor je uèitan kao vizualni DIJALOG 2 iz DLL-a!",
-        L"Verifikacija Licence (DLL)",
+		L"Želite li verificirati sigurnosni certifikat iz baze podataka?\n\n"
+		L"Verifikacija Licence (DLL)",
         MB_YESNO | MB_ICONQUESTION
     );
 

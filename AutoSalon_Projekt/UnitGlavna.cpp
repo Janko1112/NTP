@@ -1,3 +1,5 @@
+using namespace std;
+using namespace System;
 #include "UnitKlase.h"
 #include "UnitGlavna.h"
 #include <System.IniFiles.hpp>
@@ -15,19 +17,16 @@
 #include <Xml.XMLIntf.hpp>
 #include <Xml.xmldom.hpp>
 #include <System.Net.HttpClient.hpp>
-#include <System.Net.HttpClientComponent.hpp> // Ova linija rješava TNetHTTPClient
+#include <System.Net.HttpClientComponent.hpp>
 #include <System.Threading.hpp>
-#include <memory>  // Potrebno za std::unique_ptr
+#include <memory>
 TFormGlavna *FormGlavna;
 
 
 __fastcall TFormGlavna::TFormGlavna(TComponent* Owner)
 	: TForm(Owner)
 {
-    // Ovdje se inicijalizira glavna forma
 }
-
-
 
 void TFormGlavna::OsvjeziPadajuceIzbornike()
 {
@@ -35,29 +34,26 @@ void TFormGlavna::OsvjeziPadajuceIzbornike()
     ComboAutomobili->Items->Clear();
 
     try {
-        std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+        unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
         query->Connection = KonekcijaBaza;
 
-        // 1. Punjenje kupaca (Prikazujemo Ime i Prezime)
         query->SQL->Text = "SELECT ID, Ime, Prezime FROM Kupci;";
         query->Open();
         while (!query->Eof) {
-            // Spremamo tekst klijenta u izbornik
-            System::String stavka = query->FieldByName("ID")->AsString + " - " +
-                                   query->FieldByName("Ime")->AsString + " " +
-                                   query->FieldByName("Prezime")->AsString;
+            String stavka = query->FieldByName("ID")->AsString + " - " +
+                            query->FieldByName("Ime")->AsString + " " +
+                            query->FieldByName("Prezime")->AsString;
             ComboKupci->Items->Add(stavka);
             query->Next();
         }
 
-        // 2. Punjenje automobila (Prikazujemo Marku i Model)
         query->Close();
         query->SQL->Text = "SELECT ID, Marka, Model FROM Automobili;";
         query->Open();
         while (!query->Eof) {
-            System::String stavka = query->FieldByName("ID")->AsString + " - " +
-                                   query->FieldByName("Marka")->AsString + " " +
-                                   query->FieldByName("Model")->AsString;
+            String stavka = query->FieldByName("ID")->AsString + " - " +
+                            query->FieldByName("Marka")->AsString + " " +
+                            query->FieldByName("Model")->AsString;
             ComboAutomobili->Items->Add(stavka);
             query->Next();
         }
@@ -69,38 +65,36 @@ void TFormGlavna::OsvjeziPadajuceIzbornike()
 
 
 
+
 void __fastcall TFormGlavna::BtnDodajAutomobilClick(TObject *Sender)
 {
-    std::unique_ptr<TFormUnosAuta> unosForma(new TFormUnosAuta(this));
+	unique_ptr<TFormUnosAuta> unosForma(new TFormUnosAuta(this));
 
 	if (unosForma->ShowModal() == mrOk) {
-		System::String marka = unosForma->EditMarka->Text;
-        System::String model = unosForma->EditModel->Text;
+		String marka = unosForma->EditMarka->Text;
+		String model = unosForma->EditModel->Text;
+		double cijena = StrToFloat(unosForma->EditCijena->Text);
 
-        // 1. POPRAVAK ZA ToFloat(): Koristimo sigurnu sistemsku funkciju StrToFloat
-        double cijena = StrToFloat(unosForma->EditCijena->Text);
+		try {
+			unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+			query->Connection = KonekcijaBaza;
+			query->SQL->Text = "INSERT INTO Automobili (Marka, Model, Cijena) VALUES (:m, :mo, :c);";
 
-        try {
-            // 2. POPRAVAK ZA ExecSQL: Koristimo TFDQuery s parametrima, što Clang obožava
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
-            query->Connection = KonekcijaBaza;
-            query->SQL->Text = "INSERT INTO Automobili (Marka, Model, Cijena) VALUES (:m, :mo, :c);";
+			query->ParamByName("m")->AsString = marka;
+			query->ParamByName("mo")->AsString = model;
+			query->ParamByName("c")->AsFloat = cijena;
 
-            // Eksplicitno vezanje parametara po imenu
-            query->ParamByName("m")->AsString = marka;
-            query->ParamByName("mo")->AsString = model;
-            query->ParamByName("c")->AsFloat = cijena;
+			query->ExecSQL();
 
-            query->ExecSQL();
+			Memo1->Lines->Add("Uspješno spremljen automobil u bazu: " + marka + " " + model);
 
-            Memo1->Lines->Add("Uspješno spremljen automobil u bazu: " + marka + " " + model);
-
-        } catch (Exception &e) {
-            ShowMessage("Greška pri upisu u bazu: " + e.Message);
+		} catch (Exception &e) {
+			ShowMessage("Greška pri upisu u bazu: " + e.Message);
 		}
-        OsvjeziPadajuceIzbornike();
-    }
+		OsvjeziPadajuceIzbornike();
+	}
 }
+
 
 
 
@@ -108,106 +102,105 @@ void __fastcall TFormGlavna::BtnDodajAutomobilClick(TObject *Sender)
 
 void __fastcall TFormGlavna::FormCreate(TObject *Sender)
 {
-        try {
-        // 1. Aktivacija i spajanje na SQLite bazu
-        KonekcijaBaza->Connected = true;
+	try {
+		KonekcijaBaza->Connected = true;
 
-        // 2. Kreiranje tablice AUTOMOBILI (sadrži BLOB polje za sliku!)
-        KonekcijaBaza->ExecSQL(
-            "CREATE TABLE IF NOT EXISTS Automobili ("
-            "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "Marka TEXT, "
-            "Model TEXT, "
-            "Cijena REAL, "
-            "Slika BLOB" // Ovo rješava zadatak 3 (BLOB polje za sliku)
-            ");"
-        );
-
-        // 3. Kreiranje tablice KUPCI
-        KonekcijaBaza->ExecSQL(
-            "CREATE TABLE IF NOT EXISTS Kupci ("
-            "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "Ime TEXT, "
-            "Prezime TEXT, "
-            "OIB TEXT"
-            ");"
-        );
-
-        // 4. Kreiranje tablice KUPNJE s kaskadnim brisanjem
-        KonekcijaBaza->ExecSQL(
-            "CREATE TABLE IF NOT EXISTS Kupnje ("
-            "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "KupacID INTEGER, "
-            "AutomobilID INTEGER, "
-            "Datum TEXT, "
-            "FOREIGN KEY(KupacID) REFERENCES Kupci(ID) ON DELETE CASCADE, " // Dodano kaskadno brisanje
-            "FOREIGN KEY(AutomobilID) REFERENCES Automobili(ID) ON DELETE CASCADE" // Dodano kaskadno brisanje
+		KonekcijaBaza->ExecSQL(
+			"CREATE TABLE IF NOT EXISTS Automobili ("
+			"ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+			"Marka TEXT, "
+			"Model TEXT, "
+			"Cijena REAL, "
+			"Slika BLOB"
 			");"
-        );
+		);
 
+		KonekcijaBaza->ExecSQL(
+			"CREATE TABLE IF NOT EXISTS Kupci ("
+			"ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+			"Ime TEXT, "
+			"Prezime TEXT, "
+			"OIB TEXT"
+			");"
+		);
 
-        Memo1->Lines->Add("Uspješno spajanje na bazu podataka i provjera tablica!");
+		KonekcijaBaza->ExecSQL(
+			"CREATE TABLE IF NOT EXISTS Kupnje ("
+			"ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+			"KupacID INTEGER, "
+			"AutomobilID INTEGER, "
+			"Datum TEXT, "
+			"FOREIGN KEY(KupacID) REFERENCES Kupci(ID) ON DELETE CASCADE, "
+			"FOREIGN KEY(AutomobilID) REFERENCES Automobili(ID) ON DELETE CASCADE"
+			");"
+		);
 
-    } catch (Exception &e) {
-        ShowMessage("Greška pri spajanju na bazu: " + e.Message);
+		Memo1->Lines->Add("Uspješno spajanje na bazu podataka i provjera tablica!");
+
+	} catch (Exception &e) {
+		ShowMessage("Greška pri spajanju na bazu: " + e.Message);
 	}
 
-    // --- 1. RAD S INI DATOTEKOM ---
-    // Kreira se datoteka "postavke.ini" u mapi gdje je i sam program
-    std::unique_ptr<TIniFile> ini(new TIniFile(ExtractFilePath(Application->ExeName) + "postavke.ini"));
+	unique_ptr<TIniFile> ini(new TIniFile(ExtractFilePath(Application->ExeName) + "postavke.ini"));
 
-    // Uèitavamo poziciju i velièinu prozora (ako ne postoje, zadane su vrijednosti iza zareza)
-    this->Left   = ini->ReadInteger("Prozor", "Lijevo", 100);
-    this->Top    = ini->ReadInteger("Prozor", "Vrh", 100);
-    this->Width  = ini->ReadInteger("Prozor", "Sirina", 800);
-    this->Height = ini->ReadInteger("Prozor", "Visina", 600);
+	this->Left   = ini->ReadInteger("Prozor", "Lijevo", 100);
+	this->Top    = ini->ReadInteger("Prozor", "Vrh", 100);
+	this->Width  = ini->ReadInteger("Prozor", "Sirina", 800);
+	this->Height = ini->ReadInteger("Prozor", "Visina", 600);
 
-    // Uèitavamo ime salona i stavljamo ga u naslov prozora
 	String imeSalona = ini->ReadString("Salon", "Naziv", "Auto Salon - Glavni Sustav");
-    this->Caption = imeSalona;
+	this->Caption = imeSalona;
 
+	unique_ptr<TRegistry> reg(new TRegistry(KEY_WRITE | KEY_READ));
+	reg->RootKey = HKEY_CURRENT_USER;
 
-    // --- 2. RAD S WINDOWS REGISTROM ---
-    std::unique_ptr<TRegistry> reg(new TRegistry(KEY_WRITE | KEY_READ));
-    reg->RootKey = HKEY_CURRENT_USER;
-
-    // Otvaramo naš kljuè u registru (ako ne postoji, kreirat æe se)
-    if (reg->OpenKey("\\Software\\AutoSalonProjekt", true)) {
-        if (reg->ValueExists("ZadnjePokretanje")) {
-			 String zadnjiPut = reg->ReadString("ZadnjePokretanje");
+	if (reg->OpenKey("\\Software\\AutoSalonProjekt", true)) {
+		if (reg->ValueExists("ZadnjePokretanje")) {
+			String zadnjiPut = reg->ReadString("ZadnjePokretanje");
 			Memo1->Lines->Add("Dobrodošli natrag! Zadnje pokretanje aplikacije: " + zadnjiPut);
-        } else {
-            Memo1->Lines->Add("Dobrodošli! Ovo je prvo pokretanje aplikacije.");
-        }
+		} else {
+			Memo1->Lines->Add("Dobrodošli! Ovo je prvo pokretanje aplikacije.");
+		}
 
-        // Odmah zapisujemo trenutno vrijeme za iduæi put
-        reg->WriteString("ZadnjePokretanje", DateTimeToStr(Now()));
+		reg->WriteString("ZadnjePokretanje", DateTimeToStr(Now()));
 		reg->CloseKey();
 	}
-    // Dodajte na kraj FormCreate:
+
+	try {
+		String putanjaIni = ExtractFilePath(Application->ExeName) + "postavke.ini";
+		if (FileExists(putanjaIni)) {
+			unique_ptr<TIniFile> iniJezik(new TIniFile(putanjaIni));
+			bool ucitajEngleski = iniJezik->ReadBool("Konfiguracija", "EngleskiJezik", false);
+
+			if (ucitajEngleski) {
+				this->Caption = "Auto Salon Management";
+				BtnDodajAutomobil->Caption = "Add Car";
+				BtnNoviKupac->Caption = "Add Customer";
+				BtnOtvoriPostavke->Caption = "Settings";
+				Memo1->Lines->Add("[INI]: Uspješno uèitan engleski jezik iz datoteke.");
+			}
+		}
+	} catch (...) {}
+
 	OsvjeziPadajuceIzbornike();
-	// Pronaðite liniju oko 230 i zamijenite je ovim (jedan argument):
 	MojaKriticnaSekcija = new TCriticalSection();
-	ZadatakUProjedu = false; // Na poèetku ništa ne radi
-
-
+	ZadatakUProjedu = false;
 }
+
 
 void __fastcall TFormGlavna::FormClose(TObject *Sender, TCloseAction &Action)
 {
-    // Prije nego se zatvori, spremamo trenutne dimenzije prozora u INI da ih zapamti
-    std::unique_ptr<TIniFile> ini(new TIniFile(ExtractFilePath(Application->ExeName) + "postavke.ini"));
+	unique_ptr<TIniFile> ini(new TIniFile(ExtractFilePath(Application->ExeName) + "postavke.ini"));
 
-    ini->WriteInteger("Prozor", "Lijevo", this->Left);
-    ini->WriteInteger("Prozor", "Vrh", this->Top);
-    ini->WriteInteger("Prozor", "Sirina", this->Width);
+	ini->WriteInteger("Prozor", "Lijevo", this->Left);
+	ini->WriteInteger("Prozor", "Vrh", this->Top);
+	ini->WriteInteger("Prozor", "Sirina", this->Width);
 	ini->WriteInteger("Prozor", "Visina", this->Height);
 
-	// Spremit æemo i naziv salona (za test, ako ga ikad promijenimo)
 	ini->WriteString("Salon", "Naziv", this->Caption);
 	delete MojaKriticnaSekcija;
-
 }
+
 
 //---------------------------------------------------------------------------
 
@@ -219,18 +212,16 @@ void __fastcall TFormGlavna::BtnSpremiPDFClick(TObject *Sender)
         return;
     }
 
-    // Varijable u koje æemo spremiti stvarne podatke iz baze
-    System::String datumKupnje = "";
-    System::String imeKupca = "Nema";
-    System::String prezimeKupca = "kupca";
-    System::String oibKupca = "00000000000";
-    System::String markaAuta = "Nema";
-    System::String modelAuta = "vozila";
+	String datumKupnje = "";
+	String imeKupca = "Nema";
+	String prezimeKupca = "kupca";
+	String oibKupca = "00000000000";
+	String markaAuta = "Nema";
+	String modelAuta = "vozila";
     double cijenaAuta = 0.0;
 
-    try {
-        // Dohvaæamo zadnju provedenu transakciju spajanjem sve 3 tablice
-        std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+	try {
+        unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
         query->Connection = KonekcijaBaza;
         query->SQL->Text =
             "SELECT Kupnje.Datum, Kupci.Ime, Kupci.Prezime, Kupci.OIB, "
@@ -238,7 +229,7 @@ void __fastcall TFormGlavna::BtnSpremiPDFClick(TObject *Sender)
             "FROM Kupnje "
             "JOIN Kupci ON Kupnje.KupacID = Kupci.ID "
             "JOIN Automobili ON Kupnje.AutomobilID = Automobili.ID "
-            "ORDER BY Kupnje.ID DESC LIMIT 1;"; // Uzimamo zadnju kupnju
+			"ORDER BY Kupnje.ID DESC LIMIT 1;";
         query->Open();
 
         if (!query->IsEmpty()) {
@@ -258,7 +249,6 @@ void __fastcall TFormGlavna::BtnSpremiPDFClick(TObject *Sender)
         return;
     }
 
-    // --- PROCES ISPISA S REZOLUCIJSKIM POPRAVKOM ---
     int pdfIndeks = -1;
     for (int i = 0; i < Printer()->Printers->Count; i++) {
         if (Printer()->Printers->Strings[i].LowerCase().Contains("pdf")) {
@@ -274,49 +264,41 @@ void __fastcall TFormGlavna::BtnSpremiPDFClick(TObject *Sender)
     Printer()->BeginDoc();
     TCanvas* pPlatno = Printer()->Canvas;
 
-    // Postavke fonta za naslov raèuna
     pPlatno->Font->Name = "Arial";
     pPlatno->Font->Size = 26;
     pPlatno->Font->Style = TFontStyles() << fsBold;
     pPlatno->TextOut(200, 200, "AUTO SALON - RAÈUN BR. 2026/" + datumKupnje.SubString(1,2) + datumKupnje.SubString(4,2));
 
-    // Deblja linija razdvajanja ispod naslova
-    pPlatno->Pen->Width = 8;
+	pPlatno->Pen->Width = 8;
     pPlatno->MoveTo(200, 320);
     pPlatno->LineTo(4500, 320);
 
-    // Postavke fonta za opæe podatke (STVARNI KUPAC IZ BAZE)
-    pPlatno->Font->Size = 14;
+	pPlatno->Font->Size = 14;
     pPlatno->Font->Style = TFontStyles();
 
     pPlatno->TextOut(200, 450, "Datum izdavanja: " + datumKupnje);
     pPlatno->TextOut(200, 570, "Kupac: " + imeKupca + " " + prezimeKupca);
     pPlatno->TextOut(200, 690, "OIB Kupca: " + oibKupca);
 
-    // Zaglavlje tablice sa stavkama
     pPlatno->Font->Style = TFontStyles() << fsBold;
     pPlatno->TextOut(200, 950, "Stavka / Vozilo");
     pPlatno->TextOut(3000, 950, "Cijena");
 
-    // Tanka linija ispod zaglavlja tablice
     pPlatno->Pen->Width = 3;
     pPlatno->MoveTo(200, 1030);
     pPlatno->LineTo(4500, 1030);
 
-    // SAMA STAVKA (STVARNI AUTO IZ BAZE)
     pPlatno->Font->Style = TFontStyles();
     pPlatno->TextOut(200, 1120, markaAuta + " " + modelAuta + " (Novo vozilo)");
     pPlatno->TextOut(3000, 1120, FloatToStrF(cijenaAuta, ffNumber, 10, 2) + " EUR");
 
-    // Linija iznad ukupnog iznosa
     pPlatno->MoveTo(200, 1250);
     pPlatno->LineTo(4500, 1250);
 
-    // Ukupan iznos za platiti
     pPlatno->Font->Size = 16;
     pPlatno->Font->Style = TFontStyles() << fsBold;
     pPlatno->TextOut(200, 1350, "UKUPNO S PDV-om:");
-    pPlatno->TextOut(3000, 1350, FloatToStrF(cijenaAuta * 1.25, ffNumber, 10, 2) + " EUR"); // Izraèunavamo ukupno s porezom
+	pPlatno->TextOut(3000, 1350, FloatToStrF(cijenaAuta * 1.25, ffNumber, 10, 2) + " EUR");
 
     Printer()->EndDoc();
     Memo1->Lines->Add("PDF raèun uspješno generiran za kupca: " + imeKupca + " " + prezimeKupca);
@@ -331,17 +313,16 @@ void __fastcall TFormGlavna::BtnPrikaziAutiClick(TObject *Sender)
     Memo1->Clear();
     Memo1->Lines->Add("--- AUTOMOBILI U BAZI PODATAKA ---");
 
-    // Koristimo pomoænu dretvu/query za dohvat podataka
-    std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
-    query->Connection = KonekcijaBaza;
+	unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+	query->Connection = KonekcijaBaza;
     query->SQL->Text = "SELECT * FROM Automobili;";
     query->Open();
 
     while (!query->Eof) {
-        System::String id = query->FieldByName("ID")->AsString;
-        System::String marka = query->FieldByName("Marka")->AsString;
-        System::String model = query->FieldByName("Model")->AsString;
-        System::String cijena = query->FieldByName("Cijena")->AsString;
+		String id = query->FieldByName("ID")->AsString;
+		String marka = query->FieldByName("Marka")->AsString;
+		String model = query->FieldByName("Model")->AsString;
+        String cijena = query->FieldByName("Cijena")->AsString;
 
         Memo1->Lines->Add("ID: " + id + " | " + marka + " " + model + " - " + cijena + " EUR");
         query->Next();
@@ -352,15 +333,15 @@ void __fastcall TFormGlavna::BtnPrikaziAutiClick(TObject *Sender)
 
 void __fastcall TFormGlavna::BtnNoviKupacClick(TObject *Sender)
 {
-    std::unique_ptr<TFormUnosKupca> unosForma(new TFormUnosKupca(this));
+    unique_ptr<TFormUnosKupca> unosForma(new TFormUnosKupca(this));
 
     if (unosForma->ShowModal() == mrOk) {
-        System::String ime = unosForma->EditIme->Text;
-        System::String prezime = unosForma->EditPrezime->Text;
-        System::String oib = unosForma->EditOIB->Text;
+		String ime = unosForma->EditIme->Text;
+		String prezime = unosForma->EditPrezime->Text;
+		String oib = unosForma->EditOIB->Text;
 
 		try {
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = KonekcijaBaza;
             query->SQL->Text = "INSERT INTO Kupci (Ime, Prezime, OIB) VALUES (:i, :p, :o);";
 
@@ -381,32 +362,28 @@ void __fastcall TFormGlavna::BtnNoviKupacClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormGlavna::BtnKupiAutoClick(TObject *Sender)
 {
-    // Provjera je li korisnik išta odabrao u izbornicima
-    if (ComboKupci->ItemIndex == -1 || ComboAutomobili->ItemIndex == -1) {
+	if (ComboKupci->ItemIndex == -1 || ComboAutomobili->ItemIndex == -1) {
         ShowMessage("Molimo odaberite kupca i automobil iz popisa!");
         return;
     }
 
-    // Izvlaèimo ID kupca i auta iz odabranog teksta (npr. iz "2 - Ivan Horvat" izvlaèimo "2")
-    System::String tekstKupca = ComboKupci->Text;
-    System::String tekstAuta = ComboAutomobili->Text;
+	String tekstKupca = ComboKupci->Text;
+	String tekstAuta = ComboAutomobili->Text;
 
     int kupacID = StrToInt(tekstKupca.SubString(1, tekstKupca.Pos(" ") - 1));
     int autoID = StrToInt(tekstAuta.SubString(1, tekstAuta.Pos(" ") - 1));
 
     try {
-        std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+        unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
         query->Connection = KonekcijaBaza;
 
-        // Upisujemo toène ID-ove koje je korisnik izabrao
-        query->SQL->Text = "INSERT INTO Kupnje (KupacID, AutomobilID, Datum) VALUES (:kID, :aID, :datum);";
+		query->SQL->Text = "INSERT INTO Kupnje (KupacID, AutomobilID, Datum) VALUES (:kID, :aID, :datum);";
         query->ParamByName("kID")->AsInteger = kupacID;
         query->ParamByName("aID")->AsInteger = autoID;
         query->ParamByName("datum")->AsString = DateTimeToStr(Now());
         query->ExecSQL();
 
-        // Èitanje i spajanje (JOIN) preko sve 3 tablice za prikaz ugovora
-        query->Close();
+		query->Close();
         query->SQL->Text =
             "SELECT Kupnje.Datum, Kupci.Ime, Kupci.Prezime, Automobili.Marka, Automobili.Model, Automobili.Cijena "
             "FROM Kupnje "
@@ -440,22 +417,20 @@ void __fastcall TFormGlavna::BtnUrediAutoClick(TObject *Sender)
         return;
     }
 
-    // Izvlaèimo ID iz teksta (npr. iz "1 - BMW M3" dobivamo 1)
-    System::String tekstAuta = ComboAutomobili->Text;
+	String tekstAuta = ComboAutomobili->Text;
     int autoID = StrToInt(tekstAuta.SubString(1, tekstAuta.Pos(" ") - 1));
 
-    std::unique_ptr<TFormUnosAuta> unosForma(new TFormUnosAuta(this));
+	unique_ptr<TFormUnosAuta> unosForma(new TFormUnosAuta(this));
 
-    // Otvaramo formu i punimo polja s porukom korisniku da unese nove vrijednosti
     unosForma->Caption = "Ureðivanje automobila ID: " + IntToStr(autoID);
 
     if (unosForma->ShowModal() == mrOk) {
-        System::String novaMarka = unosForma->EditMarka->Text;
-        System::String noviModel = unosForma->EditModel->Text;
+		String novaMarka = unosForma->EditMarka->Text;
+		String noviModel = unosForma->EditModel->Text;
         double novaCijena = StrToFloat(unosForma->EditCijena->Text);
 
         try {
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = KonekcijaBaza;
             query->SQL->Text = "UPDATE Automobili SET Marka = :m, Model = :mo, Cijena = :c WHERE ID = :id;";
             query->ParamByName("m")->AsString = novaMarka;
@@ -465,7 +440,7 @@ void __fastcall TFormGlavna::BtnUrediAutoClick(TObject *Sender)
             query->ExecSQL();
 
             Memo1->Lines->Add("Uspješno ažuriran automobil ID " + IntToStr(autoID) + " u bazi.");
-            OsvjeziPadajuceIzbornike(); // Osvježavamo prikaz na formi
+			OsvjeziPadajuceIzbornike();
 
         } catch (Exception &e) {
             ShowMessage("Greška pri ažuriranju: " + e.Message);
@@ -482,13 +457,12 @@ void __fastcall TFormGlavna::BtnObrisiAutoClick(TObject *Sender)
         return;
     }
 
-    System::String tekstAuta = ComboAutomobili->Text;
-    int autoID = StrToInt(tekstAuta.SubString(1, tekstAuta.Pos(" ") - 1));
+	String tekstAuta = ComboAutomobili->Text;
+	int autoID = StrToInt(tekstAuta.SubString(1, tekstAuta.Pos(" ") - 1));
 
-    // Sigurnosna provjera prije brisanja
     if (MessageDlg("Jeste li sigurni da želite obrisati odabrani automobil?", mtConfirmation, TMsgDlgButtons() << mbYes << mbNo, 0) == mrYes) {
         try {
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = KonekcijaBaza;
             query->SQL->Text = "DELETE FROM Automobili WHERE ID = :id;";
             query->ParamByName("id")->AsInteger = autoID;
@@ -512,19 +486,19 @@ void __fastcall TFormGlavna::BtnUrediKupcaClick(TObject *Sender)
         return;
     }
 
-    System::String tekstKupca = ComboKupci->Text;
+	String tekstKupca = ComboKupci->Text;
     int kupacID = StrToInt(tekstKupca.SubString(1, tekstKupca.Pos(" ") - 1));
 
-    std::unique_ptr<TFormUnosKupca> unosForma(new TFormUnosKupca(this));
+    unique_ptr<TFormUnosKupca> unosForma(new TFormUnosKupca(this));
     unosForma->Caption = "Ureðivanje kupca ID: " + IntToStr(kupacID);
 
     if (unosForma->ShowModal() == mrOk) {
-        System::String novoIme = unosForma->EditIme->Text;
-        System::String novoPrezime = unosForma->EditPrezime->Text;
-        System::String noviOIB = unosForma->EditOIB->Text;
+		String novoIme = unosForma->EditIme->Text;
+		String novoPrezime = unosForma->EditPrezime->Text;
+		String noviOIB = unosForma->EditOIB->Text;
 
         try {
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = KonekcijaBaza;
             query->SQL->Text = "UPDATE Kupci SET Ime = :i, Prezime = :p, OIB = :o WHERE ID = :id;";
             query->ParamByName("i")->AsString = novoIme;
@@ -551,12 +525,12 @@ void __fastcall TFormGlavna::BtnObrisiKupcaClick(TObject *Sender)
         return;
     }
 
-    System::String tekstKupca = ComboKupci->Text;
+	String tekstKupca = ComboKupci->Text;
     int kupacID = StrToInt(tekstKupca.SubString(1, tekstKupca.Pos(" ") - 1));
 
     if (MessageDlg("Jeste li sigurni da želite obrisati odabranog kupca?", mtConfirmation, TMsgDlgButtons() << mbYes << mbNo, 0) == mrYes) {
         try {
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = KonekcijaBaza;
             query->SQL->Text = "DELETE FROM Kupci WHERE ID = :id;";
             query->ParamByName("id")->AsInteger = kupacID;
@@ -579,8 +553,7 @@ void __fastcall TFormGlavna::BtnNapredniIzvjestajClick(TObject *Sender)
     Memo1->Lines->Add("--- FILTRIRANI I SORTIRANI FINANCIJSKI IZVJEŠTAJ ---");
     Memo1->Lines->Add("");
 
-    // 1. OSNOVNI SQL UPIT S LOOKUP POLJIMA
-    String sqlUpit =
+	String sqlUpit =
         "SELECT "
         "  Kupnje.Datum, "
         "  Kupci.Ime || ' ' || Kupci.Prezime AS KupacLookup, "
@@ -593,15 +566,12 @@ void __fastcall TFormGlavna::BtnNapredniIzvjestajClick(TObject *Sender)
         "JOIN Automobili ON Kupnje.AutomobilID = Automobili.ID "
         "WHERE 1=1";
 
-    // 2. POPRAVAK ZA LINIJU 729: Èisti dohvat teksta bez kompliciranih castova
     String filterPrezime = EditTraziKupca->Text;
 
-    // Ako korisnik nije upisao ništa, preskaèemo filter
     if (filterPrezime != "") {
         sqlUpit += " AND Kupci.Prezime LIKE :filter";
     }
 
-    // 3. DODAVANJE SORTIRANJA
     if (ComboSortIzvjestaj->ItemIndex == 0) {
         sqlUpit += " ORDER BY UkupnoS_PDV ASC";
     } else if (ComboSortIzvjestaj->ItemIndex == 1) {
@@ -609,11 +579,10 @@ void __fastcall TFormGlavna::BtnNapredniIzvjestajClick(TObject *Sender)
     }
 
     try {
-        std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+        unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
         query->Connection = KonekcijaBaza;
         query->SQL->Text = sqlUpit;
 
-        // Vezanje parametra ako filter nije prazan
         if (filterPrezime != "") {
             query->ParamByName("filter")->AsString = "%" + filterPrezime + "%";
         }
@@ -661,28 +630,23 @@ void __fastcall TFormGlavna::BtnUcitajSlikuClick(TObject *Sender)
         return;
     }
 
-    // Izvlaèimo ID automobila iz izbornika
-    System::String tekstAuta = ComboAutomobili->Text;
+	String tekstAuta = ComboAutomobili->Text;
     int autoID = StrToInt(tekstAuta.SubString(1, tekstAuta.Pos(" ") - 1));
 
-    // Postavljamo filter da korisnik može birati samo slike
     OpenDialog1->Filter = "Slike (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png";
 
     if (OpenDialog1->Execute()) {
-        System::String putanjaDoSlike = OpenDialog1->FileName;
+		String putanjaDoSlike = OpenDialog1->FileName;
 
-        try {
-            // Kreiramo stream za uèitavanje datoteke s diska
-            std::unique_ptr<TFileStream> streamSlike(new TFileStream(putanjaDoSlike, fmOpenRead));
+		try {
+			unique_ptr<TFileStream> streamSlike(new TFileStream(putanjaDoSlike, fmOpenRead));
 
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = KonekcijaBaza;
 
-            // SQL upit za ažuriranje BLOB polja
             query->SQL->Text = "UPDATE Automobili SET Slika = :slika WHERE ID = :id;";
 
-            // Vezanje BLOB parametra preko streama (Clang i FireDAC standard)
-            query->ParamByName("slika")->LoadFromStream(streamSlike.get(), ftBlob);
+			query->ParamByName("slika")->LoadFromStream(streamSlike.get(), ftBlob);
             query->ParamByName("id")->AsInteger = autoID;
 
             query->ExecSQL();
@@ -703,39 +667,33 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
     Memo1->Clear();
     Memo1->Lines->Add("Pokreæem pozadinsku obradu statistike u Thread Poolu...");
 
-    // Pokreæemo JEDAN TTask koji æe u pozadini izvršiti sve tri statistike sigurno jednu za drugom
-    TTask::Run([this]() {
+	TTask::Run([this]() {
         int brojAuta = 0;
         double ukupnaCijena = 0.0;
         int brojKupaca = 0;
 
-        try {
-            // Kreiramo query za pozadinsku dretvu
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+		try {
+            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = this->KonekcijaBaza;
 
-            // 1. Brojanje automobila
             query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Automobili;";
             query->Open();
             brojAuta = query->FieldByName("Ukupno")->AsInteger;
             query->Close();
 
-            // 2. Izraèun ukupne vrijednosti
-            query->SQL->Text = "SELECT SUM(Cijena) AS Vrijednost FROM Automobili;";
+			query->SQL->Text = "SELECT SUM(Cijena) AS Vrijednost FROM Automobili;";
             query->Open();
             if (!query->FieldByName("Vrijednost")->IsNull) {
                 ukupnaCijena = query->FieldByName("Vrijednost")->AsFloat;
             }
             query->Close();
 
-            // 3. Brojanje kupaca
 			query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Kupci;";
             query->Open();
-            brojKupaca = query->FieldByName("Ukupno")->AsInteger;
-            query->Close();
+			brojKupaca = query->FieldByName("Ukupno")->AsInteger;
+			query->Close();
 
-            // Nakon što su svi pozadinski upiti gotovi, šaljemo SVE rezultate odjednom na UI
-            TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+			TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
                 this->Memo1->Lines->Add("--- POZADINSKA STATISTIKA ZAVRŠENA ---");
                 this->Memo1->Lines->Add("Ukupno automobila u salonu: " + IntToStr(brojAuta));
                 this->Memo1->Lines->Add("Ukupna vrijednost salona: " + FloatToStrF(ukupnaCijena, ffNumber, 10, 2) + " EUR");
@@ -744,8 +702,8 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
             });
 
         } catch (Exception &e) {
-            System::String greskaBaze = e.Message;
-            TThread::Synchronize(nullptr, [this, greskaBaze]() {
+            String greskaBaze = e.Message;
+			TThread::Synchronize(nullptr, [this, greskaBaze]() {
                 this->Memo1->Lines->Add("[Greška u dretvi]: " + greskaBaze);
             });
         }
@@ -758,29 +716,25 @@ void __fastcall TFormGlavna::BtnZakljucavanjeClick(TObject *Sender)
 {
     Memo1->Lines->Add("Provjeravam dostupnost zadatka...");
 
-    // Zakljuèavamo provjeru varijable kroz kritiènu sekciju da budemo thread-safe
-    MojaKriticnaSekcija->Acquire();
+	MojaKriticnaSekcija->Acquire();
     if (ZadatakUProjedu) {
         MojaKriticnaSekcija->Release();
         ShowMessage("Zadatak veæ radi u pozadini! Molimo prièekajte da završi.");
         return;
     }
 
-    // Ako je slobodno, podižemo zastavicu da je zauzeto i otkljuèavamo sekciju za druge
-    ZadatakUProjedu = true;
+	ZadatakUProjedu = true;
     MojaKriticnaSekcija->Release();
 
     Memo1->Lines->Add("Zadatak uspješno pokrenut u pozadini...");
 
-    // Pokreæemo pozadinsku dretvu
-    TTask::Run([this]() {
+	TTask::Run([this]() {
         try {
-            Sleep(2000); // Simuliramo rad od 2 sekunde
+			Sleep(2000);
 
-            // Sinkronizirani i zaštiæeni ispis u UI
             MojaKriticnaSekcija->Acquire();
             try {
-                TThread::Synchronize(nullptr, [this]() {
+				TThread::Synchronize(nullptr, [this]() {
                     this->Memo1->Lines->Add("[Kritièna Sekcija]: Podaci sigurno upisani.");
                 });
             }
@@ -788,9 +742,8 @@ void __fastcall TFormGlavna::BtnZakljucavanjeClick(TObject *Sender)
                 MojaKriticnaSekcija->Release();
             }
         }
-        __finally {
-            // Na samom kraju pozadinskog rada spuštamo zastavicu da je slobodno
-            TThread::Synchronize(nullptr, [this]() {
+		__finally {
+			TThread::Synchronize(nullptr, [this]() {
                 this->ZadatakUProjedu = false;
                 this->Memo1->Lines->Add("Pozadinski zadatak završen. Sustav slobodan.");
             });
@@ -803,21 +756,16 @@ void __fastcall TFormGlavna::BtnSiguranUIClick(TObject *Sender)
 {
     Memo1->Lines->Add("--- Pokreæem demonstraciju sigurnog UI ažuriranja ---");
 
-    // Pokreæemo pozadinsku dretvu iz Thread Poola
-    TTask::Run([this]() {
-        // Simuliramo pozadinski rad (1 sekunda)
+	TTask::Run([this]() {
         Sleep(1000);
 
-        // 1. DEMONSTRACIJA SYNCHRONIZE
-        TThread::Synchronize(nullptr, [this]() {
+		TThread::Synchronize(nullptr, [this]() {
             this->Memo1->Lines->Add("[Synchronize]: Pozadinska dretva je sigurno ažurirala suèelje.");
         });
 
-        // Simuliramo još malo rada
         Sleep(500);
 
-        // 2. DEMONSTRACIJA QUEUE
-        TThread::Queue(nullptr, [this]() {
+		TThread::Queue(nullptr, [this]() {
             this->Memo1->Lines->Add("[Queue]: Poruka poslana u red èekanja i sigurno ispisana.");
         });
     });
@@ -831,12 +779,9 @@ void __fastcall TFormGlavna::BtnIzveziSveClick(TObject *Sender)
     Memo1->Lines->Add("=== DEMONSTRACIJA XML + JSON: PISANJE, UREÐIVANJE, BRISANJE ===");
     Memo1->Lines->Add("");
 
-    // =========================================================================
-    // 1. JSON OPERACIJE (Automobili)
-    // =========================================================================
     try {
-        std::unique_ptr<TJSONArray> katalog(new TJSONArray());
-        std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+		unique_ptr<TJSONArray> katalog(new TJSONArray());
+        unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
         query->Connection = KonekcijaBaza;
         query->SQL->Text = "SELECT * FROM Automobili;";
         query->Open();
@@ -852,7 +797,6 @@ void __fastcall TFormGlavna::BtnIzveziSveClick(TObject *Sender)
             query->Next();
         }
 
-        // SIGURNOSNA PROVJERA: Radimo modifikacije samo ako u bazi ima auta!
         if (katalog->Count > 0) {
             TJSONObject* prviAuto = (TJSONObject*)katalog->Get(0);
             if (prviAuto != nullptr) {
@@ -868,7 +812,7 @@ void __fastcall TFormGlavna::BtnIzveziSveClick(TObject *Sender)
             }
 
             String putanjaJson = ExtractFilePath(Application->ExeName) + "katalog.json";
-            std::unique_ptr<TStringList> datotekaJson(new TStringList());
+			unique_ptr<TStringList> datotekaJson(new TStringList());
             datotekaJson->Add(katalog->ToString());
             datotekaJson->SaveToFile(putanjaJson, TEncoding::UTF8);
             Memo1->Lines->Add("[JSON]: Uspješno demonstrirano Pisanje, Izmjena i Brisanje u 'katalog.json'.");
@@ -877,11 +821,8 @@ void __fastcall TFormGlavna::BtnIzveziSveClick(TObject *Sender)
         }
     } catch (Exception &e) { Memo1->Lines->Add("[JSON Greška]: " + e.Message); }
 
-    // =========================================================================
-    // 2. XML OPERACIJE (Kupci)
-    // =========================================================================
     try {
-        std::unique_ptr<TFDQuery> queryKupci(new TFDQuery(nullptr));
+        unique_ptr<TFDQuery> queryKupci(new TFDQuery(nullptr));
         queryKupci->Connection = KonekcijaBaza;
         queryKupci->SQL->Text = "SELECT * FROM Kupci;";
         queryKupci->Open();
@@ -900,23 +841,18 @@ void __fastcall TFormGlavna::BtnIzveziSveClick(TObject *Sender)
             queryKupci->Next();
         }
 
-        // SIGURNOSNA PROVJERA: Radimo modifikacije samo ako u bazi ima kupaca!
-        if (korijen->ChildNodes->Count > 0) {
-            // POPRAVAK ZA PCDATA: Tražimo prvi stvarni èvor koji se zove "Kupac"
-            _di_IXMLNode prviKupac = korijen->ChildNodes->FindNode("Kupac");
+		if (korijen->ChildNodes->Count > 0) {
+			_di_IXMLNode prviKupac = korijen->ChildNodes->FindNode("Kupac");
 
-            if (prviKupac != nullptr) {
-                // Kada imamo stvarni èvor, preko FindNode mu mijenjamo tekstualnu vrijednost
+			if (prviKupac != nullptr) {
                 _di_IXMLNode prezimeNode = prviKupac->ChildNodes->FindNode("Prezime");
                 if (prezimeNode != nullptr) {
                     prezimeNode->Text = "PREZIME_IZMIJENJENO_U_XMLU";
                 }
             }
 
-            // Brisanje privremenog èvora - takoðer filtriramo samo stvarne "Kupac" èvorove
-            for (int i = 0; i < korijen->ChildNodes->Count; i++) {
-                _di_IXMLNode kNode = korijen->ChildNodes->Get(i);
-                // Preskaèemo nevidljive PCDATA razmake, radimo samo nad "Kupac" èvorovima
+			for (int i = 0; i < korijen->ChildNodes->Count; i++) {
+				_di_IXMLNode kNode = korijen->ChildNodes->Get(i);
                 if (kNode != nullptr && kNode->NodeName == "Kupac") {
                     _di_IXMLNode dNode = kNode->ChildNodes->FindNode("ObrisiMe");
                     if (dNode != nullptr) {
@@ -949,10 +885,9 @@ void __fastcall TFormGlavna::BtnUveziSveClick(TObject *Sender)
     String putanjaJson = ExtractFilePath(Application->ExeName) + "katalog.json";
     String putanjaXml = ExtractFilePath(Application->ExeName) + "kupci.xml";
 
-    // 1. ÈITANJE JSON DATOTEKE
     if (FileExists(putanjaJson)) {
         try {
-            std::unique_ptr<TStringList> datoteka(new TStringList());
+            unique_ptr<TStringList> datoteka(new TStringList());
             datoteka->LoadFromFile(putanjaJson, TEncoding::UTF8);
 
             TJSONArray* katalog = (TJSONArray*)TJSONObject::ParseJSONValue(datoteka->Text);
@@ -971,7 +906,6 @@ void __fastcall TFormGlavna::BtnUveziSveClick(TObject *Sender)
 
     Memo1->Lines->Add("");
 
-    // 2. ÈITANJE XML DATOTEKE
 	if (FileExists(putanjaXml)) {
         try {
             _di_IXMLDocument xmlDoc = LoadXMLDocument(putanjaXml);
@@ -999,54 +933,47 @@ void __fastcall TFormGlavna::BtnPreuzmiKatalogClick(TObject *Sender)
     Memo1->Clear();
     Memo1->Lines->Add("--- POKREÆEM HTTP PREUZIMANJE S TRAŽENIM LIMITOM BRZINE ---");
 
-    // Inicijaliziramo ProgressBar na 100 fiksnih koraka
-    ProgressBarPreuzimanje->Min = 0;
+	ProgressBarPreuzimanje->Min = 0;
     ProgressBarPreuzimanje->Max = 100;
     ProgressBarPreuzimanje->Position = 0;
 
-    System::String url = "https://porsche.com";
-    System::String putanjaSpremanja = ExtractFilePath(Application->ExeName) + "Porsche_Katalog_ICE.pdf";
+	String url = "https://porsche.com";
+    String putanjaSpremanja = ExtractFilePath(Application->ExeName) + "Porsche_Katalog_ICE.pdf";
 
-    // DEFINIRANJE PAUZE ZA SVAKI POSTOTAK (%) PROGRES BARA NA TEMELJU IZBORA
     int pauzaZaSvakiPostotakMs = 0;
     if (ComboBrzina->ItemIndex == 0) {
-        pauzaZaSvakiPostotakMs = 200; // SPORO: 200ms po svakom postotku -> Traka æe putovati pune 20 sekunde!
+		pauzaZaSvakiPostotakMs = 200;
         Memo1->Lines->Add("[Mod]: Pokrenuto u ekstremno sporom naèinu rada (Ukupno trajanje: 20s)...");
     } else if (ComboBrzina->ItemIndex == 1) {
-        pauzaZaSvakiPostotakMs = 50;  // SREDNJE: 50ms po svakom postotku -> Traka æe proputovati za 5 sekundi.
-        Memo1->Lines->Add("[Mod]: Pokrenuto u srednjem naèinu rada (Ukupno trajanje: 5s)...");
+		pauzaZaSvakiPostotakMs = 50;
+		Memo1->Lines->Add("[Mod]: Pokrenuto u srednjem naèinu rada (Ukupno trajanje: 5s)...");
     } else {
-        pauzaZaSvakiPostotakMs = 0;   // NEOGRANIÈENO: Bez pauze, traka leti trenutno na 100%!
-        Memo1->Lines->Add("[Mod]: Pokrenuto bez ikakvog ogranièenja brzine...");
+		pauzaZaSvakiPostotakMs = 0;
+		Memo1->Lines->Add("[Mod]: Pokrenuto bez ikakvog ogranièenja brzine...");
     }
 
-    TTask::Run([this, url, putanjaSpremanja, pauzaZaSvakiPostotakMs]() {
-        try {
-            // 1. MREŽNI DIO: Prvo u pozadini munjevito povlaèemo datoteku s weba u stream
-            std::unique_ptr<THTTPClient> klijent(THTTPClient::Create());
+	TTask::Run([this, url, putanjaSpremanja, pauzaZaSvakiPostotakMs]() {
+		try {
+			unique_ptr<THTTPClient> klijent(THTTPClient::Create());
             _di_IHTTPResponse odgovor = klijent->Get(url);
             TStream* mrezniStream = odgovor->ContentStream;
 
-            std::unique_ptr<TFileStream> lokalniFile(new TFileStream(putanjaSpremanja, fmCreate));
-            lokalniFile->CopyFrom(mrezniStream, 0); // Sigurno kopiramo cijeli sadržaj na disk
+			unique_ptr<TFileStream> lokalniFile(new TFileStream(putanjaSpremanja, fmCreate));
+			lokalniFile->CopyFrom(mrezniStream, 0);
 
-            // 2. VIZUALNI DIO KOÈENJA: Sada simuliramo i koèimo punjenje trake prema odabranom naèinu rada
             for (int i = 1; i <= 100; i++) {
 
-                // Sinkronizirano šaljemo postotak na glavno suèelje (UI)
-                TThread::Synchronize(nullptr, [this, i]() {
+				TThread::Synchronize(nullptr, [this, i]() {
                     this->ProgressBarPreuzimanje->Position = i;
                     this->Caption = "Preuzimanje kataloga: " + IntToStr(i) + "%";
                 });
 
-                // PRISILNA KOÈNICA TRAKE: Ako je odabran limit, dretva spava zadani broj milisekundi
                 if (pauzaZaSvakiPostotakMs > 0) {
                     Sleep(pauzaZaSvakiPostotakMs);
                 }
             }
 
-            // Uspješan završetak rada
-            TThread::Synchronize(nullptr, [this, putanjaSpremanja]() {
+			TThread::Synchronize(nullptr, [this, putanjaSpremanja]() {
                 this->Caption = "Upravljanje Auto Salonom";
                 this->Memo1->Lines->Add("[HTTP]: Preuzimanje uspješno završeno!");
                 this->Memo1->Lines->Add("Porsche katalog spremljen na: " + putanjaSpremanja);
@@ -1054,8 +981,8 @@ void __fastcall TFormGlavna::BtnPreuzmiKatalogClick(TObject *Sender)
             });
 
         } catch (Exception &e) {
-            System::String tekstGreske = e.Message;
-            TThread::Synchronize(nullptr, [this, tekstGreske]() {
+			String tekstGreske = e.Message;
+			TThread::Synchronize(nullptr, [this, tekstGreske]() {
                 this->Memo1->Lines->Add("[HTTP Iznimka]: " + tekstGreske);
             });
         }
@@ -1067,37 +994,35 @@ void __fastcall TFormGlavna::BtnPreuzmiKatalogClick(TObject *Sender)
 
 void __fastcall TFormGlavna::BtnDohvatiTecajClick(TObject *Sender)
 {
-    Memo1->Clear();
+	Memo1->Clear();
     Memo1->Lines->Add("Spajam se na službeni API Hrvatske narodne banke...");
 
     String urlTecaj = "https://hnb.hr";
 
-    TTask::Run([this, urlTecaj]() {
-        try {
-            std::unique_ptr<THTTPClient> klijent(THTTPClient::Create());
+	TTask::Run([this, urlTecaj]() {
+		try {
+            unique_ptr<THTTPClient> klijent(THTTPClient::Create());
             klijent->UserAgent = "Mozilla/5.0";
 
             _di_IHTTPResponse odgovor = klijent->Get(urlTecaj);
             String jsonRezultat = odgovor->ContentAsString();
 
-            // Provjeravamo je li odgovor uspješno stigao s mreže
             if (odgovor->StatusCode == 200 && jsonRezultat.Contains("USD")) {
 
-                // Buduæi da znamo da je teèaj stabilan, ispisujemo ga u èistom formatu
-                TThread::Synchronize(nullptr, [this]() {
+				TThread::Synchronize(nullptr, [this]() {
                     this->Memo1->Lines->Add("");
                     this->Memo1->Lines->Add("--- REST API: HNB SINKRONIZACIJA ---");
 					this->Memo1->Lines->Add("Trenutni službeni teèaj salona: 1 EUR = 1.08 USD");
                 });
             } else {
-                TThread::Synchronize(nullptr, [this, jsonRezultat]() {
+				TThread::Synchronize(nullptr, [this, jsonRezultat]() {
                     this->Memo1->Lines->Add("[HNB Greška]: API nije odgovorio ispravno.");
                     this->Memo1->Lines->Add("Odgovor servera: " + jsonRezultat.SubString(1, 100));
                 });
             }
         } catch (Exception &e) {
             String greskaMreze = e.Message;
-            TThread::Synchronize(nullptr, [this, greskaMreze]() {
+			TThread::Synchronize(nullptr, [this, greskaMreze]() {
                 this->Memo1->Lines->Add("[HNB Mrežna Iznimka]: " + greskaMreze);
             });
         }
@@ -1111,39 +1036,33 @@ void __fastcall TFormGlavna::BtnPokreniDllClick(TObject *Sender)
     Memo1->Clear();
     Memo1->Lines->Add("Uèitavam dinamièku biblioteku 'ProjektKnjiznica.dll'...");
 
-    // 1. Dinamièki uèitavamo DLL datoteku s diska
     HMODULE hDll = LoadLibrary(L"ProjektKnjiznica.dll");
 
     if (hDll != NULL) {
         Memo1->Lines->Add("DLL uspješno uèitan u memorijski prostor!");
 
-        // Definiramo prototip funkcija koje povlaèimo iz DLL-a
-        typedef double (__stdcall *PorezFunc)(double);
+		typedef double (__stdcall *PorezFunc)(double);
         typedef double (__stdcall *UvozFunc)(double);
 
-        // 2. Tražimo adrese funkcija unutar uèitanog DLL-a (GetProcAddress)
         PorezFunc IzracunajPorez = (PorezFunc)GetProcAddress(hDll, "DllIzracunajPorez");
         UvozFunc IzracunajUvoz = (UvozFunc)GetProcAddress(hDll, "DllIzracunajUvoz");
 
         if (IzracunajPorez != NULL && IzracunajUvoz != NULL) {
 
-            // 3. Provjeravamo je li korisnik uopæe odabrao automobil u izborniku
-            if (ComboAutomobili->ItemIndex == -1) {
+			if (ComboAutomobili->ItemIndex == -1) {
                 ShowMessage("Molimo odaberite automobil iz padajuæeg popisa kako bi DLL izraèunao troškove!");
                 FreeLibrary(hDll);
                 return;
             }
 
-            // 4. Izvlaèimo ID i naziv odabranog automobila iz teksta (npr. "3 - Audi A4")
             String tekstAuta = ComboAutomobili->Text;
             int autoID = StrToInt(tekstAuta.SubString(1, tekstAuta.Pos(" ") - 1));
 
             double cijenaIzBaze = 0.0;
             String nazivAuta = "";
 
-            try {
-                // 5. Brzim upitom iz baze izvlaèimo stvarnu cijenu i model tog auta
-                std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+			try {
+				unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
                 query->Connection = KonekcijaBaza;
                 query->SQL->Text = "SELECT Marka, Model, Cijena FROM Automobili WHERE ID = :id;";
                 query->ParamByName("id")->AsInteger = autoID;
@@ -1163,11 +1082,9 @@ void __fastcall TFormGlavna::BtnPokreniDllClick(TObject *Sender)
                 return;
             }
 
-            // 6. Prosljeðujemo stvarnu cijenu iz baze u funkcije iz DLL klase!
             double porez = IzracunajPorez(cijenaIzBaze);
             double uvoz = IzracunajUvoz(cijenaIzBaze);
 
-            // Prilagoðeni ispis na ekran
             Memo1->Lines->Add("");
             Memo1->Lines->Add("--- REZULTATI IZ VANJSKE DLL KLASE ---");
             Memo1->Lines->Add("Vozilo iz baze: " + nazivAuta + " (ID: " + IntToStr(autoID) + ")");
@@ -1179,7 +1096,6 @@ void __fastcall TFormGlavna::BtnPokreniDllClick(TObject *Sender)
             Memo1->Lines->Add("Greška: Nije moguæe dohvatiti adrese funkcija unutar DLL-a.");
         }
 
-        // 7. Oslobaðamo knjižnicu iz memorije nakon proraèuna
         FreeLibrary(hDll);
         Memo1->Lines->Add("DLL sigurno osloboðen iz memorije.");
 
@@ -1236,11 +1152,10 @@ void __fastcall TFormGlavna::BtnDllLicencaClick(TObject *Sender)
 
 void __fastcall TFormGlavna::BtnOtvoriPostavkeClick(TObject *Sender)
 {
-    std::unique_ptr<TFormPostavke> postavkeForma(new TFormPostavke(this));
+	unique_ptr<TFormPostavke> postavkeForma(new TFormPostavke(this));
 
-    // Èitamo trenutno stanje aplikacije da postavimo toèan odabir u ComboBox pri otvaranju
-    String putanjaIni = ExtractFilePath(Application->ExeName) + "postavke.ini";
-    std::unique_ptr<TIniFile> iniCitanje(new TIniFile(putanjaIni));
+	String putanjaIni = ExtractFilePath(Application->ExeName) + "postavke.ini";
+	unique_ptr<TIniFile> iniCitanje(new TIniFile(putanjaIni));
     bool trenutnoEngleski = iniCitanje->ReadBool("Konfiguracija", "EngleskiJezik", false);
 
     postavkeForma->ComboJezik->ItemIndex = trenutnoEngleski ? 1 : 0;
@@ -1248,7 +1163,6 @@ void __fastcall TFormGlavna::BtnOtvoriPostavkeClick(TObject *Sender)
     if (postavkeForma->ShowModal() == mrOk) {
         bool odabranEngleski = (postavkeForma->ComboJezik->ItemIndex == 1);
 
-        // 1. Primjena jezika na suèelje
         if (odabranEngleski) {
             this->Caption = "Auto Salon Management";
             BtnDodajAutomobil->Caption = "Add Car";
@@ -1263,15 +1177,12 @@ void __fastcall TFormGlavna::BtnOtvoriPostavkeClick(TObject *Sender)
             Memo1->Lines->Add("Jezik promijenjen na Hrvatski.");
         }
 
-        // 2. SPREMANJE U INI DATOTEKU (Zadržavamo samo èistu konfiguraciju jezika)
-        try {
-            std::unique_ptr<TIniFile> iniZapis(new TIniFile(putanjaIni));
+		try {
+			unique_ptr<TIniFile> iniZapis(new TIniFile(putanjaIni));
 
-            // Èistimo sve stare automatske sekcije da datoteka bude potpuno uredna
-            iniZapis->EraseSection("Prozor");
-            iniZapis->EraseSection("Salon");
+			iniZapis->EraseSection("Prozor");
+			iniZapis->EraseSection("Salon");
 
-            // Zapisujemo iskljuèivo odabrani jezik
             iniZapis->WriteBool("Konfiguracija", "EngleskiJezik", odabranEngleski);
 
             Memo1->Lines->Add("[INI]: Odabir jezika uspješno spremljen u 'postavke.ini'.");

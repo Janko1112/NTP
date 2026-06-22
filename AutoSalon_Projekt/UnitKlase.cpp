@@ -2,7 +2,6 @@
 #include "UnitKlase.h"
 #pragma package(smart_init)
 
-// --- Implementacija za TAutomobil ---
 TAutomobil::TAutomobil(String marka, String model, double cijena) {
     Marka = marka;
     Model = model;
@@ -23,7 +22,6 @@ void TAutomobil::PrimijeniPopust(double postotak) {
     }
 }
 
-// --- Implementacija za TKupac ---
 TKupac::TKupac(String ime, String prezime, String oib) {
     Ime = ime;
     Prezime = prezime;
@@ -38,7 +36,6 @@ String TKupac::GetOIB() {
     return OIB;
 }
 
-// --- Implementacija za TKupnja ---
 TKupnja::TKupnja(TKupac* k, TAutomobil* a, String datum) {
     Kupac = k;
     Automobil = a;
@@ -46,7 +43,7 @@ TKupnja::TKupnja(TKupac* k, TAutomobil* a, String datum) {
 }
 
 String TKupnja::GenerirajUgovor() {
-    String ispis = ""; // Inicijaliziramo prazan RAD Studio String
+	String ispis = "";
 
     ispis += "UGOVOR O KUPNJI\n";
     ispis += "Datum: " + Datum + "\n";

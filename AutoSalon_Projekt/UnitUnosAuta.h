@@ -11,14 +11,14 @@
 //---------------------------------------------------------------------------
 class TFormUnosAuta : public TForm
 {
-__published:	// IDE-managed Components
+__published:
 	TEdit *EditMarka;
 	TEdit *EditModel;
 	TEdit *EditCijena;
 	TButton *BtnSpremi;
 	void __fastcall BtnSpremiClick(TObject *Sender);
-private:	// User declarations
-public:		// User declarations
+private:
+public:
 	__fastcall TFormUnosAuta(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

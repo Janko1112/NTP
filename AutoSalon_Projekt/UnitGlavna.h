@@ -28,7 +28,7 @@
 
 class TFormGlavna : public TForm
 {
-__published:	// IDE-managed Components
+__published:
 	TMemo *Memo1;
 	TButton *BtnDodajAutomobil;
 	TButton *BtnSpremiPDF;
@@ -87,7 +87,7 @@ __published:	// IDE-managed Components
 	void __fastcall BtnDllLicencaClick(TObject *Sender);
 	void __fastcall BtnOtvoriPostavkeClick(TObject *Sender);
 
-public:		// User declarations
+public:
 	__fastcall TFormGlavna(TComponent* Owner);
 	void OsvjeziJezikAplikacije(bool engleski);
 	void OsvjeziPadajuceIzbornike();
@@ -96,9 +96,7 @@ public:		// User declarations
 
 private:
 	TCriticalSection* MojaKriticnaSekcija;
-    bool ZadatakUProjedu; // Zamjena za Mutex koja radi savršeno s dretvama
-
-
+	bool ZadatakUProjedu;
 };
 
 extern PACKAGE TFormGlavna *FormGlavna;

@@ -11,14 +11,14 @@
 //---------------------------------------------------------------------------
 class TFormUnosKupca : public TForm
 {
-__published:	// IDE-managed Components
+__published:
 	TEdit *EditIme;
 	TEdit *EditPrezime;
 	TEdit *EditOIB;
 	TButton *BtnSpremiKupca;
 	void __fastcall BtnSpremiKupcaClick(TObject *Sender);
-private:	// User declarations
-public:		// User declarations
+private:
+public:
 	__fastcall TFormUnosKupca(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

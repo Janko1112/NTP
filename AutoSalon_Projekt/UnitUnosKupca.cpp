@@ -16,7 +16,7 @@ __fastcall TFormUnosKupca::TFormUnosKupca(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormUnosKupca::BtnSpremiKupcaClick(TObject *Sender)
 {
-    this->ModalResult = mrOk; // Signalizira glavnoj formi da zatvori prozor i spremi
+    this->ModalResult = mrOk;
 }
 
 //---------------------------------------------------------------------------
