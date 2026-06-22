@@ -261,39 +261,39 @@ void __fastcall TFormGlavna::BtnSpremiPDFClick(TObject *Sender)
     }
 
     Printer()->Title = "Auto_Salon_Racun";
-    Printer()->BeginDoc();
-    TCanvas* pPlatno = Printer()->Canvas;
+	Printer()->BeginDoc();
+	TCanvas* pPlatno = Printer()->Canvas;
 
-    pPlatno->Font->Name = "Arial";
-    pPlatno->Font->Size = 26;
-    pPlatno->Font->Style = TFontStyles() << fsBold;
-    pPlatno->TextOut(200, 200, "AUTO SALON - RAÈUN BR. 2026/" + datumKupnje.SubString(1,2) + datumKupnje.SubString(4,2));
+	pPlatno->Font->Name = "Arial";
+	pPlatno->Font->Size = 26;
+	pPlatno->Font->Style = TFontStyles() << fsBold;
+	pPlatno->TextOut(200, 200, "AUTO SALON - RAÈUN BR. 2026/" + datumKupnje.SubString(1,2) + datumKupnje.SubString(4,2));
 
 	pPlatno->Pen->Width = 8;
-    pPlatno->MoveTo(200, 320);
-    pPlatno->LineTo(4500, 320);
+	pPlatno->MoveTo(200, 430);
+	pPlatno->LineTo(4500, 430);
 
 	pPlatno->Font->Size = 14;
     pPlatno->Font->Style = TFontStyles();
 
-    pPlatno->TextOut(200, 450, "Datum izdavanja: " + datumKupnje);
-    pPlatno->TextOut(200, 570, "Kupac: " + imeKupca + " " + prezimeKupca);
-    pPlatno->TextOut(200, 690, "OIB Kupca: " + oibKupca);
+	pPlatno->TextOut(200, 450, "Datum izdavanja: " + datumKupnje);
+	pPlatno->TextOut(200, 570, "Kupac: " + imeKupca + " " + prezimeKupca);
+	pPlatno->TextOut(200, 690, "OIB Kupca: " + oibKupca);
 
-    pPlatno->Font->Style = TFontStyles() << fsBold;
+	pPlatno->Font->Style = TFontStyles() << fsBold;
     pPlatno->TextOut(200, 950, "Stavka / Vozilo");
-    pPlatno->TextOut(3000, 950, "Cijena");
+	pPlatno->TextOut(3000, 950, "Cijena");
 
-    pPlatno->Pen->Width = 3;
-    pPlatno->MoveTo(200, 1030);
-    pPlatno->LineTo(4500, 1030);
+	pPlatno->Pen->Width = 3;
+	pPlatno->MoveTo(200, 1070);
+	pPlatno->LineTo(4500, 1070);
 
     pPlatno->Font->Style = TFontStyles();
     pPlatno->TextOut(200, 1120, markaAuta + " " + modelAuta + " (Novo vozilo)");
     pPlatno->TextOut(3000, 1120, FloatToStrF(cijenaAuta, ffNumber, 10, 2) + " EUR");
 
     pPlatno->MoveTo(200, 1250);
-    pPlatno->LineTo(4500, 1250);
+	pPlatno->LineTo(4500, 1250);
 
     pPlatno->Font->Size = 16;
     pPlatno->Font->Style = TFontStyles() << fsBold;
@@ -1013,7 +1013,7 @@ void __fastcall TFormGlavna::BtnDohvatiTecajClick(TObject *Sender)
                     this->Memo1->Lines->Add("");
                     this->Memo1->Lines->Add("--- REST API: HNB SINKRONIZACIJA ---");
 					this->Memo1->Lines->Add("Trenutni službeni teèaj salona: 1 EUR = 1.08 USD");
-                });
+				});
             } else {
 				TThread::Synchronize(nullptr, [this, jsonRezultat]() {
                     this->Memo1->Lines->Add("[HNB Greška]: API nije odgovorio ispravno.");
