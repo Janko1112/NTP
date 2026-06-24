@@ -667,13 +667,15 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
     Memo1->Clear();
     Memo1->Lines->Add("Pokreæem pozadinsku obradu statistike u Thread Poolu...");
 
-	TTask::Run([this]() {
+    TTask::Run([this]() {
         int brojAuta = 0;
         double ukupnaCijena = 0.0;
         int brojKupaca = 0;
 
-		try {
-            unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+        try {
+            Sleep(4000);
+
+            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = this->KonekcijaBaza;
 
             query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Automobili;";
@@ -681,19 +683,19 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
             brojAuta = query->FieldByName("Ukupno")->AsInteger;
             query->Close();
 
-			query->SQL->Text = "SELECT SUM(Cijena) AS Vrijednost FROM Automobili;";
+            query->SQL->Text = "SELECT SUM(Cijena) AS Vrijednost FROM Automobili;";
             query->Open();
             if (!query->FieldByName("Vrijednost")->IsNull) {
                 ukupnaCijena = query->FieldByName("Vrijednost")->AsFloat;
             }
             query->Close();
 
-			query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Kupci;";
+            query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Kupci;";
             query->Open();
-			brojKupaca = query->FieldByName("Ukupno")->AsInteger;
-			query->Close();
+            brojKupaca = query->FieldByName("Ukupno")->AsInteger;
+            query->Close();
 
-			TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+            TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
                 this->Memo1->Lines->Add("--- POZADINSKA STATISTIKA ZAVRŠENA ---");
                 this->Memo1->Lines->Add("Ukupno automobila u salonu: " + IntToStr(brojAuta));
                 this->Memo1->Lines->Add("Ukupna vrijednost salona: " + FloatToStrF(ukupnaCijena, ffNumber, 10, 2) + " EUR");
@@ -702,13 +704,14 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
             });
 
         } catch (Exception &e) {
-            String greskaBaze = e.Message;
-			TThread::Synchronize(nullptr, [this, greskaBaze]() {
+            System::String greskaBaze = e.Message;
+            TThread::Synchronize(nullptr, [this, greskaBaze]() {
                 this->Memo1->Lines->Add("[Greška u dretvi]: " + greskaBaze);
             });
         }
     });
 }
+
 
 //---------------------------------------------------------------------------
 
@@ -1169,12 +1172,58 @@ void __fastcall TFormGlavna::BtnOtvoriPostavkeClick(TObject *Sender)
             BtnNoviKupac->Caption = "Add Customer";
             BtnOtvoriPostavke->Caption = "Settings";
             Memo1->Lines->Add("Language switched to English.");
+            BtnIzveziSve->Caption = "Export data";
+            BtnUveziSve->Caption = "Import data";
+            BtnSpremiPDF->Caption = "Generate PDF";
+            BtnPrikaziAuti->Caption = "Show all vehicles";
+            BtnUrediKupca->Caption = "Edit customer";
+            BtnUrediAuto->Caption = "Edit car";
+            BtnObrisiKupca->Caption = "Delete customer";
+            BtnObrisiAuto->Caption = "Delete car";
+            ComboKupci->Text = "Choose customer";
+            ComboAutomobili->Text ="Choose car";
+            BtnKupiAuto->Caption ="Make a deal";
+            BtnUcitajSliku->Caption = "Load a picture for selected car";
+            BtnPokreniDretve->Caption ="Run threads";
+            BtnSiguranUI->Caption = "Test Synchronize i Queue";
+            BtnZakljucavanje->Caption = "Demonstrate lock";
+            EditTraziKupca->Text ="Search customer";
+            ComboSortIzvjestaj->Text ="Sort reports";
+            BtnNapredniIzvjestaj->Caption = "Advanced financial report";
+            BtnPreuzmiKatalog->Caption ="Download PDF catalog";
+            BtnDohvatiTecaj->Caption ="Update EUR/USD course";
+            BtnPokreniDll->Caption ="Cost calculation via dll class";
+            BtnDllOAutoru->Caption ="About the author (Dll)";
+            BtnDllLicenca->Caption = "License (Dll)";
         } else {
             this->Caption = "Upravljanje Auto Salonom";
             BtnDodajAutomobil->Caption = "Dodaj automobil";
             BtnNoviKupac->Caption = "Dodaj novog kupca";
             BtnOtvoriPostavke->Caption = "Postavke";
             Memo1->Lines->Add("Jezik promijenjen na Hrvatski.");
+            BtnIzveziSve->Caption = "1. Izvoz podataka (Zapis, Izmjena, Brisanje)";
+            BtnUveziSve->Caption = "2. Uvoz podataka (Èitanje i Parsiranje)";
+            BtnSpremiPDF->Caption = "Generiraj PDF Raèun";
+            BtnPrikaziAuti->Caption = "Uèitaj automobile iz baze";
+            BtnUrediKupca->Caption = "Uredi kupca";
+            BtnUrediAuto->Caption = "Uredi auto";
+            BtnObrisiKupca->Caption = "Obriši kupca";
+            BtnObrisiAuto->Caption = "Obriši auto";
+            ComboKupci->Text = "Odaberi kupca";
+            ComboAutomobili->Text ="Odaberi auto";
+            BtnKupiAuto->Caption ="Zapiši kupnju (Spajanje tablica)";
+            BtnUcitajSliku->Caption = "Spremi sliku za selektirani auto";
+            BtnPokreniDretve->Caption ="Pokreni Thread Pool zadatke";
+            BtnSiguranUI->Caption = "Testiraj Synchronize i Queue";
+            BtnZakljucavanje->Caption = "Demonstriraj Zakljuèavanje";
+            EditTraziKupca->Text ="Traži kupca";
+            ComboSortIzvjestaj->Text ="Sortiraj izvještaje";
+            BtnNapredniIzvjestaj->Caption = "Napredni financijski izvješta";
+            BtnPreuzmiKatalog->Caption ="Preuzmi PDF Katalog";
+            BtnDohvatiTecaj->Caption ="Ažuriraj teèaj EUR/USD uživo";
+            BtnPokreniDll->Caption ="Izraèun troškova preko DLL klase";
+            BtnDllOAutoru->Caption ="Pokreni DLL Dijalog 1 (O Autoru)";
+            BtnDllLicenca->Caption = "Pokreni DLL Dijalog 2 (Licenca)";
         }
 
 		try {

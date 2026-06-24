@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.576,=C:\Users\janko\OneDrive\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.233,C:\Users\janko\OneDrive\Documents\Embarcadero\Studio\Projects\Project1PCH1.h=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\ProjektKnjiznicaPCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.579,=C:\Users\janko\OneDrive\Documents\Embarcadero\Studio\Projects\File1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.249,C:\Users\janko\OneDrive\Documents\Embarcadero\Studio\Projects\File1.cpp=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\File1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.264,C:\Users\janko\OneDrive\Documents\Embarcadero\Studio\Projects\Project1.cbproj=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\ProjektKnjiznica.cbproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.616,C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\File1.cpp=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\MojaKnjiznica.cpp</Transaction>
+    <Transaction>2026.06.24 15:29:30.544,=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\Unit1.cpp</Transaction>
+    <Transaction>2026.06.24 15:30:02.518,C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\UnitDllForma.cpp=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\Unit1.cpp</Transaction>
+    <Transaction>2026.06.24 15:30:02.518,C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\UnitDllForma.h=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\Unit1.h</Transaction>
+    <Transaction>2026.06.24 15:30:02.518,C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\UnitDllForma.dfm=C:\Users\janko\OneDrive\Desktop\AutoSalon_Projekt\Unit1.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

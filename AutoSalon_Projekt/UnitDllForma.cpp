@@ -1,0 +1,24 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "UnitDllForma.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TFormDllProzor *FormDllProzor;
+//---------------------------------------------------------------------------
+__fastcall TFormDllProzor::TFormDllProzor(TComponent* Owner)
+	: TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+
+void TFormDllProzor::PostaviPodatke(String naslov, String tekst)
+{
+    this->Caption = naslov;
+    LabelNaslov->Caption = naslov;
+    LabelTekst->Caption = tekst;
+}
+
