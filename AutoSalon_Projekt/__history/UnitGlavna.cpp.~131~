@@ -664,18 +664,16 @@ void __fastcall TFormGlavna::BtnUcitajSlikuClick(TObject *Sender)
 
 void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
 {
-	Memo1->Clear();
+    Memo1->Clear();
+    Memo1->Lines->Add("Pokreæem pozadinsku obradu statistike u Thread Poolu...");
 
     TTask::Run([this]() {
         int brojAuta = 0;
         double ukupnaCijena = 0.0;
         int brojKupaca = 0;
-        double kompleksnaSimulacijaTrzista = 0.0;
 
-		try {
-			for (int i = 0; i < 5000000; i++) {
-                kompleksnaSimulacijaTrzista += (i * 0.0001) / 3.14;
-            }
+        try {
+            Sleep(4000);
 
             std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = this->KonekcijaBaza;
@@ -697,7 +695,8 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
             brojKupaca = query->FieldByName("Ukupno")->AsInteger;
             query->Close();
 
-			TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+            TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+                this->Memo1->Lines->Add("--- POZADINSKA STATISTIKA ZAVRŠENA ---");
                 this->Memo1->Lines->Add("Ukupno automobila u salonu: " + IntToStr(brojAuta));
                 this->Memo1->Lines->Add("Ukupna vrijednost salona: " + FloatToStrF(ukupnaCijena, ffNumber, 10, 2) + " EUR");
                 this->Memo1->Lines->Add("Ukupno registriranih kupaca: " + IntToStr(brojKupaca));
@@ -712,7 +711,6 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
         }
     });
 }
-
 
 
 //---------------------------------------------------------------------------
@@ -1213,7 +1211,7 @@ void __fastcall TFormGlavna::BtnOtvoriPostavkeClick(TObject *Sender)
             BtnObrisiAuto->Caption = "Obriši auto";
             ComboKupci->Text = "Odaberi kupca";
             ComboAutomobili->Text ="Odaberi auto";
-			BtnKupiAuto->Caption ="Zapiši kupnju (Spajanje tablica)";
+            BtnKupiAuto->Caption ="Zapiši kupnju (Spajanje tablica)";
             BtnUcitajSliku->Caption = "Spremi sliku za selektirani auto";
             BtnPokreniDretve->Caption ="Pokreni Thread Pool zadatke";
             BtnSiguranUI->Caption = "Testiraj Synchronize i Queue";

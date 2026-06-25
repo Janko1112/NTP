@@ -697,7 +697,8 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
             brojKupaca = query->FieldByName("Ukupno")->AsInteger;
             query->Close();
 
-			TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+            TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+                this->Memo1->Lines->Add("--- POZADINSKA STATISTIKA ZAVRŠENA ---");
                 this->Memo1->Lines->Add("Ukupno automobila u salonu: " + IntToStr(brojAuta));
                 this->Memo1->Lines->Add("Ukupna vrijednost salona: " + FloatToStrF(ukupnaCijena, ffNumber, 10, 2) + " EUR");
                 this->Memo1->Lines->Add("Ukupno registriranih kupaca: " + IntToStr(brojKupaca));

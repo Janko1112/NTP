@@ -664,7 +664,8 @@ void __fastcall TFormGlavna::BtnUcitajSlikuClick(TObject *Sender)
 
 void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
 {
-	Memo1->Clear();
+    Memo1->Clear();
+    Memo1->Lines->Add("Pokreæem pozadinsku obradu složene financijske statistike...");
 
     TTask::Run([this]() {
         int brojAuta = 0;
@@ -697,7 +698,8 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
             brojKupaca = query->FieldByName("Ukupno")->AsInteger;
             query->Close();
 
-			TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+            TThread::Synchronize(nullptr, [this, brojAuta, ukupnaCijena, brojKupaca]() {
+                this->Memo1->Lines->Add("--- POZADINSKA STATISTIKA ZAVRŠENA ---");
                 this->Memo1->Lines->Add("Ukupno automobila u salonu: " + IntToStr(brojAuta));
                 this->Memo1->Lines->Add("Ukupna vrijednost salona: " + FloatToStrF(ukupnaCijena, ffNumber, 10, 2) + " EUR");
                 this->Memo1->Lines->Add("Ukupno registriranih kupaca: " + IntToStr(brojKupaca));
