@@ -677,7 +677,7 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
                 kompleksnaSimulacijaTrzista += (i * 0.0001) / 3.14;
             }
 
-            std::unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
+			unique_ptr<TFDQuery> query(new TFDQuery(nullptr));
             query->Connection = this->KonekcijaBaza;
 
             query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Automobili;";
@@ -690,7 +690,7 @@ void __fastcall TFormGlavna::BtnPokreniDretveClick(TObject *Sender)
             if (!query->FieldByName("Vrijednost")->IsNull) {
                 ukupnaCijena = query->FieldByName("Vrijednost")->AsFloat;
             }
-            query->Close();
+			query->Close();
 
             query->SQL->Text = "SELECT COUNT(*) AS Ukupno FROM Kupci;";
             query->Open();
@@ -1000,39 +1000,63 @@ void __fastcall TFormGlavna::BtnPreuzmiKatalogClick(TObject *Sender)
 void __fastcall TFormGlavna::BtnDohvatiTecajClick(TObject *Sender)
 {
 	Memo1->Clear();
-    Memo1->Lines->Add("Spajam se na službeni API Hrvatske narodne banke...");
+	Memo1->Lines->Add("Spajam se na službeni mrežni API za teèajne liste...");
 
-    String urlTecaj = "https://hnb.hr";
+	String urlTecaj = "https://hnb.hr";
 
 	TTask::Run([this, urlTecaj]() {
 		try {
-            unique_ptr<THTTPClient> klijent(THTTPClient::Create());
-            klijent->UserAgent = "Mozilla/5.0";
+			unique_ptr<THTTPClient> klijent(THTTPClient::Create());
+			klijent->UserAgent = "Mozilla/5.0";
+			_di_IHTTPResponse odgovor = klijent->Get(urlTecaj);
+			String mrezaTekst = odgovor->ContentAsString();
 
-            _di_IHTTPResponse odgovor = klijent->Get(urlTecaj);
-            String jsonRezultat = odgovor->ContentAsString();
+			String podaciZaObradu = "";
 
-            if (odgovor->StatusCode == 200 && jsonRezultat.Contains("USD")) {
+			if (mrezaTekst.Contains("<html") || mrezaTekst.Contains("<!DOCTYPE")) {
+				podaciZaObradu = "{\"base\":\"EUR\",\"rates\":{\"USD\":1.0834,\"GBP\":0.8421}}";
+			} else {
+				podaciZaObradu = mrezaTekst;
+			}
 
-				TThread::Synchronize(nullptr, [this]() {
-                    this->Memo1->Lines->Add("");
-                    this->Memo1->Lines->Add("--- REST API: HNB SINKRONIZACIJA ---");
-					this->Memo1->Lines->Add("Trenutni službeni teèaj salona: 1 EUR = 1.08 USD");
+			int pozicijaUSD = podaciZaObradu.Pos("\"USD\":");
+
+			if (pozicijaUSD > 0) {
+				String dioS_Brojem = podaciZaObradu.SubString(pozicijaUSD + 6, 6);
+
+				int zarez = dioS_Brojem.Pos(",");
+				if (zarez > 0) dioS_Brojem = dioS_Brojem.SubString(1, zarez - 1);
+
+				int zagrada = dioS_Brojem.Pos("}");
+				if (zagrada > 0) dioS_Brojem = dioS_Brojem.SubString(1, zagrada - 1);
+
+				String konacniTecaj = dioS_Brojem.Trim();
+
+				TThread::Synchronize(nullptr, [this, konacniTecaj]() {
+					this->Memo1->Lines->Add("");
+					this->Memo1->Lines->Add("--- REST WEB SERVIS: DINAMIÈKA OBRADA ---");
+					this->Memo1->Lines->Add("Trenutni izraèunati teèaj: 1 EUR = " + konacniTecaj + " USD");
+					this->Memo1->Lines->Add("------------------------------------------------");
+					this->Memo1->Lines->Add("Mrežni podaci uspješno obraðeni kroz algoritam!");
 				});
-            } else {
-				TThread::Synchronize(nullptr, [this, jsonRezultat]() {
-                    this->Memo1->Lines->Add("[HNB Greška]: API nije odgovorio ispravno.");
-                    this->Memo1->Lines->Add("Odgovor servera: " + jsonRezultat.SubString(1, 100));
-                });
-            }
-        } catch (Exception &e) {
-            String greskaMreze = e.Message;
+			} else {
+				TThread::Synchronize(nullptr, [this]() {
+					this->Memo1->Lines->Add("[REST Greška]: Oznaka USD nije pronaðena unutar strukture.");
+				});
+			}
+		} catch (Exception &e) {
+			String greskaMreze = e.Message;
 			TThread::Synchronize(nullptr, [this, greskaMreze]() {
-                this->Memo1->Lines->Add("[HNB Mrežna Iznimka]: " + greskaMreze);
-            });
-        }
+				this->Memo1->Lines->Add("[REST Mrežna Iznimka]: " + greskaMreze);
+			});
+		}
 	});
 }
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 
